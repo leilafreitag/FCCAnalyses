@@ -195,7 +195,8 @@ if __name__ == "__main__":
         print (fileName, " ",)
         print (" ...")
         
-    outDir = sys.argv[0].replace(sys.argv[0].split('/')[0],'outputs/').replace('analysis_Bc2TauNu.py','')+'/'
+#    outDir = sys.argv[0].replace(sys.argv[0].split('/')[0],'outputs/').replace('analysis_Bc2TauNu.py','')+'/'
+    outDir = "outputs"
     import os
     os.system("mkdir -p {}".format(outDir))
     outfile = outDir+sys.argv[1].split('/')[-1]

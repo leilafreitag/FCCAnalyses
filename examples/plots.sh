@@ -1,0 +1,15 @@
+# Vertex resolution
+python FCCee/vertex/summary_plots.py -i FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_plots/plots.root FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_simple_plots/plots.root FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_simple_130mrad_plots/plots.root  FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_simple_120mrad_plots/plots.root FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_simple_110mrad_plots/plots.root -a Bs2JpsiPhi
+mv FCCee/vertex/comparison_plots/* FCCee/vertex/comparison_plots_vertex_resolution_forward_coverage
+
+python FCCee/vertex/summary_plots.py -i FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_plots/plots.root FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_simple_plots/plots.root FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_shorteningWholeBarrel_plots/plots.root  FCCee/vertex/evtGen_ecm91_Bs2JpsiPhi_FullSilicon_R1.0_shorteningWholeBarrel_compactEndcap_plots/plots.root -a Bs2JpsiPhi
+mv FCCee/vertex/comparison_plots/* FCCee/vertex/comparison_plots_vertex_resolution
+
+
+# Geometries
+python FCCee/vertex/summary_plots.py -i FCCee/vertex/Zmumu_ecm91_FullSilicon_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_simple_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_shorteningWholeBarrel_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_shorteningWholeBarrel_compactEndcap_plots/plots.root -a impact_parameter
+mv FCCee/vertex/comparison_plots/* FCCee/vertex/comparison_plots_impact_parameter
+
+# Forward coverage
+python FCCee/vertex/summary_plots.py -i FCCee/vertex/Zmumu_ecm91_FullSilicon_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_simple_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_simple_130mrad_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_simple_120mrad_plots/plots.root FCCee/vertex/Zmumu_ecm91_FullSilicon_R1.0_simple_110mrad_plots/plots.root -a impact_parameter
+mv FCCee/vertex/comparison_plots/* FCCee/vertex/comparison_plots_impact_parameter_forward_coverage
