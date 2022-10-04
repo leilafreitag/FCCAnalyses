@@ -96,3 +96,7 @@ venv.bak/
 
 # Benchmarking
 benchmark*json
+
+*.pdf
+*.log
+*.swp

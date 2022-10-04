@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sample_folder="~/simulation_files_forward"
+sample_folder="~/simulation_files"
 #sample_folder="/eos/user/a/afehr/simulation_files_latest2"
 
 files=(
@@ -17,8 +17,8 @@ files=(
         "Zmumu_ecm91_FullSilicon_R1.0_simple.root"
 #		"Zmumu_ecm91_FullSilicon_noFirstLayer.root"
 #		"Zmumu_ecm91_FullSilicon_beamPipe125.root"
-		"Zmumu_ecm91_FullSilicon_R1.0_shorteningWholeBarrel_compactEndcap.root"
-		"Zmumu_ecm91_FullSilicon_R1.0_shorteningWholeBarrel.root"
+#		"Zmumu_ecm91_FullSilicon_R1.0_shorteningWholeBarrel_compactEndcap.root"
+#		"Zmumu_ecm91_FullSilicon_R1.0_shorteningWholeBarrel.root"
 #        "Zmumu_ecm91_standard.root"
 #	"evtGen_ecm91_Bs2DsK.root"
 #	"evtGen_ecm91_Bs2DsK_FullSilicon.root"
@@ -92,7 +92,7 @@ for file in "${files[@]}"; do
 	#python FCCee/vertex/validation_tkParam_adj.py ~/simulation_files_latest/${file}
 #	nohup python ~/FCCeePhysicsPerformance/case-studies/flavour/VertexExamples/analysis_Bs2DsK.py ${sample_folder}/${file} > /dev/null 2>&1 
 #    nohup python ~/FCCeePhysicsPerformance/case-studies/flavour/VertexExamples/analysis_Bs2JPsiPhi.py ${sample_folder}/${file}  > ${file}.log & #/dev/null 2>&1
-    nohup python ~/FCCAnalyses/examples/FCCee/vertex/validation_tkParam_adj.py ${sample_folder}/${file}  > ${file}.log & 
+    nohup fccanalysis run  ~/FCCAnalyses/examples/FCCee/vertex/validation_tkParam_adj.py --files-list ${sample_folder}/${file} --output $file  > ${file}.log & 
 done
 
 #python FCCee/vertex/plotting_armin.py -i FCCee/vertex/*.root
