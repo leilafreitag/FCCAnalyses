@@ -15,12 +15,22 @@ files=(
 )
 
 
-for file in "${files[@]}"; do
-        echo $file
+#files=("ParticleGun_Mu_standard_1GeV_10degrees.root")
+
+#for file in "${files[@]}"; do
+#        echo $file
         #python FCCee/vertex/validation_tkParam_adj.py ~/simulation_files_latest/${file}
 #	nohup python ~/FCCeePhysicsPerformance/case-studies/flavour/VertexExamples/analysis_Bs2DsK.py ${sample_folder}/${file} > /dev/null 2>&1
 #    nohup python ~/FCCeePhysicsPerformance/case-studies/flavour/VertexExamples/analysis_Bs2JPsiPhi.py ${sample_folder}/${file}  > ${file}.log & #/dev/null 2>&1
-    nohup fccanalysis run  ~/FCCAnalyses/examples/FCCee/vertex/validation_tkParam_adj.py --files-list ${sample_folder}/${file} --output $file  > ${file}.log &
+#    nohup fccanalysis run  ~/FCCAnalyses/examples/FCCee/vertex/validation_tkParam_adj.py --files-list ${sample_folder}/${file} --output $file  > ${file}.log &
+#done
+
+
+
+for filepath in ~/basic_stage/simulation_files/ParticleGun_Mu_*_8.5degrees.root; do
+        echo $filepath
+        name=(`echo $filepath | cut -d '/' -f 9`) #get only the file name from the path
+        nohup fccanalysis run ~/FCCAnalyses/examples/FCCee/vertex/validation_tkParam_adj.py --files-list $filepath --output $name  > ${name}.log &
+        echo $name
 done
 
-#python FCCee/vertex/plotting_armin.py -i FCCee/vertex/*.root

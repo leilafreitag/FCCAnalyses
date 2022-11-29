@@ -1,6 +1,6 @@
 import sys, argparse, os
 import ROOT
-from ROOT import gROOT,TFile,TCanvas,TH1F,TH2F,TProfile,TStyle,gStyle,TLatex,TPad,gPad,TCut,TLegend,TF1,TMath,TObjArray,TH1D,THStack,TH1
+from ROOT import gROOT,TFile,TCanvas,TH1F,TH2F,TProfile,TStyle,gStyle,TLatex,TPad,gPad,TCut,TLegend,TF1,TMath,TObjArray,TH1D,THStack,TH1,TPaveText,TText
 
 colors = [1,2,3,4,5,6,7,8]
 linestyles = [1,2,3,4,5,6,7,8]
@@ -17,11 +17,14 @@ def parse_arguments(argv=None):
 
 
 def name_for_legend(name):
-    if name == "standard": new_name = "standard (pipe radius 1.5cm, all VTX layers width 250 \mum)"
-    elif name == "R1.3": new_name = "pipe radius 1.3cm, all VTX layers 280 \mum"
-    elif name == "R1.3_w30": new_name = "pipe radius 1.3cm, inner VTX layers width 30 \mum"
-    elif name == "R1.3_w50": new_name = "pipe radius 1.3cm, inner VTX layers width 50 \mum"
-    elif name == "R1.3_w100": new_name = "pipe radius 1.3cm, inner VTX layers width 100 \mum"
+    if name == "standard": new_name = "Standard IDEA: R(Layer_{1}) = 1.7 cm, w(VTX layers) = 280 \mum"
+    elif name == "R1.3": new_name = "+ R(Layer_{1}) = 1.3 cm"
+    elif name == "R1.3_w30": new_name = "+ w(first 3 VTX layers) = 30 \mum"
+    elif name == "R1.3_w50": new_name = "+ w(first 3 VTX layers) = 50 \mum"
+    elif name == "R1.3_w100": new_name = "+ w(first 3 VTX layers) = 100 \mum"
+    elif name == "R1.3_w30_DSK": new_name = "+ w(8 VTX disc layers) = 30 \mum"
+    elif name == "R1.3_w50_DSK": new_name = "+ w(8 VTX disc layers) = 50 \mum"
+    elif name == "R1.3_w100_DSK": new_name = "+ w(8 VTX disc layers) = 100 \mum"
     else: new_name = name
     return new_name
 
@@ -30,28 +33,51 @@ def plot_impact_parameter(outDir,input_files,process_name):
     gStyle.SetErrorX(0)
 
     # D0
-    stack = THStack("hs","D_{0} Resolution vs. cos(#theta) ;cos(#theta); \sigma_{D0} [\mum]")
+    stack = THStack("hs",";cos(#theta); \sigma_{D0} [\mum]")
     hists = list()
 
-    for i, input_file in enumerate(input_files):
+    colors_all=[1,2,3,3,4,4,6,6]
+    markers_all=[20,21,20,4,21,25,22,26]
+    colors_1=[1,2,8,4,4]
+    markers_1=[20,21,47,22,26]
+    i=0
+
+    for input_file in input_files:
         f = TFile(input_file,"READ")
         name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
-        hist = TProfile(f.Get("h_slices_D0"))
-        hist.SetName(name)
-        hist.SetTitle(name)
-        hist.SetMarkerColor(colors[i])
-        hist.SetMarkerStyle(20)
-        hist.SetLineColor(colors[i])
-        hist.SetLineStyle(linestyles[i])
-        hist.SetMarkerSize(0.6)
-        hists.append(hist)
-        stack.Add(hist)
+        if name	== "standard" or name =="R1.3" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
+            hist = TProfile(f.Get("h_slices_D0"))
+            hist.SetName(name)
+            hist.SetTitle(name_for_legend(name))
+            hist.SetMarkerColor(colors_1[i])
+            hist.SetMarkerStyle(markers_1[i])
+            hist.SetLineColor(colors_1[i])
+            hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
+            hist.SetMarkerSize(0.7)
+            hists.append(hist)
+            stack.Add(hist)
+            i+=1
 
     c1 = TCanvas("c1","c1")
-    stack.SetMaximum(5)
+    stack.SetMaximum(4.0) #last point is out of range
     stack.SetMinimum(1.5)
     stack.Draw("nostack,e1pl")
-    gPad.BuildLegend(0.15,0.6,0.5,0.88,"")
+    stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack.GetYaxis().SetLabelSize(0.04) 
+    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
+    #stack.GetXaxis().SetTitleSize(0.15)
+    #stack.GetYaxis().ChangeLabel(labSize=30) 
+    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendFillColor()
+    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
+    
+    tt=TLatex()
+    tt.SetTextSize(0.035)
+    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    gPad.Modified()
+    gPad.Update()
 
     outfile = outDir+ "/plots.root"
     outf=TFile.Open(outfile,"RECREATE")
@@ -61,7 +87,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
     c1.Close()
 
     # D0 comparison without disks
-    stack_nodisks = THStack("hs_nodisks","D_{0} Resolution vs. cos(#theta) ;cos(#theta); \sigma_{D0} [\mum]")
+    stack_nodisks = THStack("hs_nodisks",";cos(#theta); \sigma_{D0} [\mum]")
     hists = list()
 
     colors_2 = [1,2,8,40,4]
@@ -83,6 +109,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
             hist.SetMarkerStyle(markers_2[i])
             hist.SetLineColor(colors_2[i])
             hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
             hist.SetMarkerSize(0.6)
             hists.append(hist)
             stack_nodisks.Add(hist)
@@ -92,7 +119,10 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack_nodisks.SetMaximum(4.5)
     stack_nodisks.SetMinimum(1.75)
     stack_nodisks.Draw("nostack,e1pl")
-    gPad.BuildLegend(0.15,0.6,0.80,0.88,"") #x1 y1 x2 y2 coordinates of legend
+    gPad.BuildLegend(0.15,0.6,0.3,0.88,"") #x1 y1 x2 y2 coordinates of legend
+
+    gStyle.SetLegendTextSize(0.03)
+    #AddText(0.5,0.5,"IDEA Delphes Simulation")
 
     outfile = outDir+ "/plots.root"
     outf=TFile.Open(outfile,"RECREATE")
@@ -103,7 +133,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0 comparison WITH disks
-    stack_disks = THStack("hs_disks","D_{0} Resolution vs. cos(#theta) ;cos(#theta); \sigma_{D0} [\mum]")
+    stack_disks = THStack("hs_disks",";cos(#theta); \sigma_{D0} [\mum]")
     hists = list()
 
     colors_2 = [1,1,2,2,4,4]
@@ -123,16 +153,23 @@ def plot_impact_parameter(outDir,input_files,process_name):
             hist.SetMarkerStyle(markers_2[i])
             hist.SetLineColor(colors_2[i])
             hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
             hist.SetMarkerSize(0.6)
             hists.append(hist)
             stack_disks.Add(hist)
             i+=1
 
     c1 = TCanvas("c1","c1")
-    stack_disks.SetMaximum(3.5)
-    stack_disks.SetMinimum(1.75)
+    stack_disks.SetMaximum(3.2)
+    stack_disks.SetMinimum(1.8)
     stack_disks.Draw("nostack,e1pl")
-    gPad.BuildLegend(0.15,0.6,0.80,0.88,"") #x1 y1 x2 y2 coordinates of legend
+    gPad.BuildLegend(0.30,0.6,0.45,0.88,"") #x1 y1 x2 y2 coordinates of legend
+
+    tt=TLatex()
+    tt.SetTextSize(0.035)
+    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    gPad.Modified()
+    gPad.Update()
 
     outfile = outDir+ "/plots.root"
     outf=TFile.Open(outfile,"RECREATE")
@@ -173,29 +210,54 @@ def plot_impact_parameter(outDir,input_files,process_name):
     c1_zoom.Write()
     c1_zoom.Close()
 
+
+
     # Z0
-    stack2 = THStack("hs2","Z_{0} Resolution vs. cos(#theta) ;cos(#theta); \sigma_{Z0} [\mum]")  
+    stack = THStack("hs",";cos(#theta); \sigma_{Z0} [\mum]")
     hists = list()
 
-    for i, input_file in enumerate(input_files):
+    colors_all=[1,2,3,3,4,4,6,6]
+    markers_all=[20,21,20,4,21,25,22,26]
+    colors_1=[1,2,8,4,4]
+    markers_1=[20,21,47,22,26]
+    i=0
+
+    for input_file in input_files:
         f = TFile(input_file,"READ")
         name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
-        hist = TProfile(f.Get("h_slices_Z0"))
-        hist.SetName(name)
-        hist.SetTitle(name)
-        hist.SetMarkerColor(colors[i])
-        hist.SetMarkerStyle(20)
-        hist.SetLineColor(colors[i])
-        hist.SetLineStyle(linestyles[i])
-        hist.SetMarkerSize(0.6)
-        hists.append(hist)
-        stack2.Add(hist)
+        if name == "standard" or name =="R1.3" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
+            hist = TProfile(f.Get("h_slices_Z0"))
+            hist.SetName(name)
+            hist.SetTitle(name_for_legend(name))
+            hist.SetMarkerColor(colors_1[i])
+            hist.SetMarkerStyle(markers_1[i])
+            hist.SetLineColor(colors_1[i])
+            hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
+            hist.SetMarkerSize(0.7)
+            hists.append(hist)
+            stack.Add(hist)
+            i+=1
 
     c2 = TCanvas("c2","c2")
-    stack2.SetMaximum(10)
-    stack2.SetMinimum(1.5)
-    stack2.Draw("nostack,e1pl")
-    gPad.BuildLegend(0.15,0.6,0.5,0.88,"")
+    stack.SetMaximum(7.0)
+    stack.SetMinimum(1.5)
+    stack.Draw("nostack,e1pl")
+    stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack.GetYaxis().SetLabelSize(0.04)
+    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
+    #stack.GetXaxis().SetTitleSize(0.15)
+    #stack.GetYaxis().ChangeLabel(labSize=30)
+    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendFillColor()
+    gPad.BuildLegend(0.25,0.65,0.4,0.88,"")
+
+    tt=TLatex()
+    tt.SetTextSize(0.035)
+    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    gPad.Modified()
+    gPad.Update()
 
     outfile = outDir+ "/plots.root"
     outf=TFile.Open(outfile,"RECREATE")
@@ -205,8 +267,9 @@ def plot_impact_parameter(outDir,input_files,process_name):
     c2.Close()
 
 
+
     # Z0 comparison without disks
-    stack2_nodisks = THStack("hs2_nodisks","D_{0} Resolution vs. cos(#theta) ;cos(#theta); \sigma_{D0} [\mum]")
+    stack2_nodisks = THStack("hs2_nodisks",";cos(#theta); \sigma_{Z0} [\mum]")
     hists = list()
 
     colors_2 = [1,2,8,40,4]
@@ -227,20 +290,69 @@ def plot_impact_parameter(outDir,input_files,process_name):
             hist.SetMarkerStyle(markers_2[i])
             hist.SetLineColor(colors_2[i])
             hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
             hist.SetMarkerSize(0.6)
             hists.append(hist)
             stack2_nodisks.Add(hist)
             i+=1
 
     c2 = TCanvas("c2","c2")
-    stack2_nodisks.SetMaximum(8)
+    stack2_nodisks.SetMaximum(7)
     stack2_nodisks.SetMinimum(1.5)
     stack2_nodisks.Draw("nostack,e1pl")
-    gPad.BuildLegend(0.15,0.6,0.80,0.88,"")
+    gPad.BuildLegend(0.26,0.6,0.45,0.88,"")
     outfile = outDir+ "/plots.root"
     outf=TFile.Open(outfile,"RECREATE")
 
     c2.SaveAs(outDir + "/" + "Z0_comparison_nodisks.pdf")
+    c2.Write()
+    c2.Close()
+
+
+
+    # Z0 comparison WITH disks
+    stack_disks = THStack("hs_disks",";cos(#theta); \sigma_{Z0} [\mum]")
+    hists = list()
+
+    colors_2 = [1,1,2,2,4,4]
+    markers_2 = [20,24,21,25,22,26]#47
+    #markers_2 = [20,20,20,20,20]
+    i = 0
+
+    for input_file in input_files:
+        f = TFile(input_file,"READ")
+        name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
+        legend_name = name_for_legend(name)
+        if name != "standard" and name !="R1.3":
+            hist = TProfile(f.Get("h_slices_Z0"))
+            hist.SetName(name)
+            hist.SetTitle(legend_name) #changes the label in the legend
+            hist.SetMarkerColor(colors_2[i])
+            hist.SetMarkerStyle(markers_2[i])
+            hist.SetLineColor(colors_2[i])
+            hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
+            hist.SetMarkerSize(0.6)
+            hists.append(hist)
+            stack_disks.Add(hist)
+            i+=1
+
+    c2 = TCanvas("c2","c2")
+    stack_disks.SetMaximum(7)
+    stack_disks.SetMinimum(1.5)
+    stack_disks.Draw("nostack,e1pl")
+    gPad.BuildLegend(0.30,0.6,0.45,0.88,"") #x1 y1 x2 y2 coordinates of legend
+
+    tt=TLatex()
+    tt.SetTextSize(0.035)
+    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    gPad.Modified()
+    gPad.Update()
+
+    outfile = outDir+ "/plots.root"
+    outf=TFile.Open(outfile,"RECREATE")
+
+    c2.SaveAs(outDir + "/" + "Z0_comparison_disks.pdf")
     c2.Write()
     c2.Close()
 

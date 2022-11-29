@@ -128,7 +128,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
         stack2.Add(hist)
 
     c2 = TCanvas("c2","c2")
-    stack2.SetMaximum(16)
+    stack2.SetMaximum(14)
     stack2.SetMinimum(0)
     stack2.Draw("nostack,e1pl")
     gPad.BuildLegend(0.15,0.6,0.5,0.88,"")
