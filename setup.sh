@@ -19,6 +19,6 @@ else
 fi
 
 # Source the needed flavour packages that have been installed in FCCeePhysicsPerformance/case-studies/flavour/dataframe with FCCeePhysicsPerformance/setup.sh
-cd /afs/cern.ch/user/a/afehr/FCCeePhysicsPerformance/case-studies/flavour/dataframe
+cd /afs/cern.ch/user/l/lfreitag/FCCeePhysicsPerformance/case-studies/flavour/dataframe
 source ./localSetup.sh
-cd /afs/cern.ch/user/a/afehr/FCCAnalyses
+cd /afs/cern.ch/user/l/lfreitag/FCCAnalyses
