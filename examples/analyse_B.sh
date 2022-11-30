@@ -3,7 +3,7 @@
 sample_folder="~/basic_stage/simulation_files"
 
 
-for filepath in ~/basic_stage/simulation_files/evtGen_ecm91_Bs2JpsiPhi_*.root; do
+for filepath in ~/basic_stage/simulation_files/evtGen_ecm91_Bs2JpsiPhi*standard.root; do
         echo $filepath
         name=(`echo $filepath | cut -d '/' -f 9`) #get only the file name from the path
         echo $name
