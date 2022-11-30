@@ -273,6 +273,21 @@ def plot_raw(outDir):
 #    ff.SetParameters(0.2,10,10,0,-0.2,10,1000,0.5)
 
     # D0 :
+    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0")
+    cleila1.Divide(2,1)
+
+    cleila1.cd(1)
+    h1 = TH1F("h1", "RP_TRK_D0;D0 [\mum]",100,-50,50)
+    events.Draw("1e3*RP_TRK_D0>>h1","TMath::Abs(RP_TRK_D0)<0.1")
+
+    cleila1.cd(2)
+    h2 = TH1F("h2", "Sqrt(RP_TRK_D0_cov);\sigma_{D0} [\mum]",100,0,10)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov)>>h2","TMath::Sqrt(RP_TRK_D0_cov) < 1e+1")
+
+    cleila1.SaveAs(outDir + "/" + "RP_TRK_D0_leila.pdf")
+    cleila1.Write()
+
+
     c1 = TCanvas("RP_TRK_D0","RP_TRK_D0")
     c1.Divide(4,1)
     
@@ -307,11 +322,26 @@ def plot_raw(outDir):
 
 
     # Z0 :
+    cleila = TCanvas("RP_TRK_Z0","RP_TRK_Z0")
+    cleila.Divide(2,1)
+
+    cleila.cd(1)
+    h4 = TH1F("h4","RP_TRK_Z0;Z0 [\mum]",100,-1500,1500)
+    events.Draw("1e3*RP_TRK_Z0>>h4")
+
+    cleila.cd(2)
+    h5 = TH1F("h5","Sqrt(RP_TRK_Z0_cov);\sigma_{Z0} [\mum]",100,0,30)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_Z0_cov)>>h5")
+
+    cleila.SaveAs(outDir + "/" + "RP_TRK_Z0_leila.pdf")
+    cleila.Write()
+
+
     c2 = TCanvas("RP_TRK_Z0","RP_TRK_Z0")
     c2.Divide(4,1)
     
     c2.cd(1)
-    h4 = TH1F("h4","RP_TRK_Z0",100,-40,40)
+    h4 = TH1F("h4","RP_TRK_Z0",100,-1500,1500)
     events.Draw("1e3*RP_TRK_Z0>>h4") 
     h4.Fit("gaus")
     
