@@ -12,20 +12,11 @@ def parse_arguments(argv=None):
 
 def fit_function():
 
-	# Double gauss
-#	ff = TF1("ff","[0]*exp(-0.5*((x-[1])/[2])**2) + [0]*[3]*exp(-0.5*((x-[1])/([2]*[4]))**2)",-200,200)
-#	ff.SetParameters(500,0,20,0.25,2.0)
-#	ff.SetParLimits(0,10,10000)
-#	ff.SetParLimits(1,-100,100)
-#	ff.SetParLimits(2,3,200)
-#	ff.SetParLimits(3,0.0,0.5)
-#	ff.SetParLimits(4,1.5,20)
-	
 	# Double crystal ball function with shared sigma and mean value
 	ff = TF1("ff","[6]*(ROOT::Math::crystalball_function(x, [0], [1], [2], [3]) + [6]*ROOT::Math::crystalball_function(x, [4], [5], [2], [3]))",-200,200);
 	ff.SetParLimits(0,0.0,5)					# alpha_L
 	ff.SetParLimits(1,0.0,500.0)				# n_L
-	ff.SetParLimits(2,8.0,200.0)				# sigma
+	ff.SetParLimits(2,5.0,200.0)				# sigma (before was 2,8.0,200.0)
 	ff.SetParLimits(3,-50.0,50.0)				# mu
 	ff.SetParLimits(4,-5.0,0.0)					# alpha_R
 	ff.SetParLimits(5,0.0,500.0)				# n_R
@@ -91,6 +82,8 @@ def vertex_resolution(outDir,events,cut,ff):
     hFD2D.Write()
     ctest.SaveAs(outDir + "/" + "test.pdf")
     ctest.Write()
+
+
 
 
 
@@ -361,7 +354,7 @@ def plot_SV(outDir):
     # cos(theta) overview
     c_vertexRecoCosTheta_all = TCanvas("c_vertexRecoCosTheta_all","c_vertexRecoCosTheta_all")
     h_vertexRecoCosTheta_all = TH2F("h_vertexRecoCosTheta_all",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",20,0,1,2000,-500,500)
-    events.Draw("dR_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta_all", cut)
+    events.Draw("dR_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta_all", cut)
     c_vertexRecoCosTheta_all.SaveAs(outDir + "/" + "Bs_vertexReco_distribution.pdf")
     c_vertexRecoCosTheta_all.Write()
 
@@ -381,16 +374,77 @@ def plot_SV(outDir):
     c_slices_fit.Write()
     hxi.Write()
 
+
+    #leila edit: absval added
+    h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
+    events.Draw("TMath::Abs(dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
+    arr = TObjArray()
+    h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
+    hxi = TH1D(arr[3]) #TAKING THE MEAN FROM THE FIT BECAUSE I TOOK ABSVAL
+    hxi.SetTitle(";cos(#theta);Distance of closest SV to MC B_{s}^{0} vertex [#mum]")
+    hxi.SetName("h_slicesReco_abs")
+    hxi.Draw()
+    hxi.SetMinimum(0)
+    hxi.SetMaximum(60)
+    c_slices_fit.SaveAs(outDir + "/" + "Bs_vertex_reco_slices_leila_abs.pdf")
+    c_slices_fit.Write()
+    hxi.Write()
+
+    #leila edit: using not dR but just d
+    h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
+    events.Draw("d_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
+    arr = TObjArray()
+    h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
+    hxi = TH1D(arr[2])
+    hxi.SetTitle(";cos(#theta);Distance of closest SV to MC B_{s}^{0} vertex [#mum]")
+    hxi.SetName("h_slicesReco_d")
+    hxi.Draw()
+    hxi.SetMinimum(0)
+    hxi.SetMaximum(60)
+    c_slices_fit.SaveAs(outDir + "/" + "Bs_vertex_reco_slices_d.pdf")
+    c_slices_fit.Write()
+    hxi.Write()
+
+    #leila edit: using not dr but d, and doing the absval thing
+    h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
+    events.Draw("TMath::Abs(d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
+    arr = TObjArray()
+    h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
+    hxi = TH1D(arr[3]) #TAKING THE MEAN FROM THE FIT BECAUSE I TOOK ABSVAL
+    hxi.SetTitle(";cos(#theta);Distance of closest SV to MC B_{s}^{0} vertex [#mum]")
+    hxi.SetName("h_slicesReco_d_abs")
+    hxi.Draw()
+    hxi.SetMinimum(0)
+    hxi.SetMaximum(60)
+    c_slices_fit.SaveAs(outDir + "/" + "Bs_vertex_reco_slices_leila_d_abs.pdf")
+    c_slices_fit.Write()
+    hxi.Write()
+
+
     #TProfile to make summary plot flight distance reso vs costheta later, but this time using distance of closest SV to Bs Vertex. so this is more like SV resol? 
     ctest = TCanvas("SV","SV")
+
 
     hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
     events.Draw("TMath::Abs(dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
     hSV2D.SetMaximum(60)
     hSV2D.SetMinimum(0.000)
-    hSV2D.SetName("h_slices_SV")
+    hSV2D.SetName("h_slices_SV_dR_min_nofit")
     hSV2D.Write()
-    ctest.SaveAs(outDir + "/" + "test_SV.pdf")
+    ctest.SaveAs(outDir + "/" + "test_SV_min.pdf")
+    ctest.Write()
+
+
+    hSV2D_2 = TProfile("hSV2D_2", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
+    events.Draw("TMath::Abs(d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
+    hSV2D_2.SetMaximum(60)
+    hSV2D_2.SetMinimum(0.000)
+    hSV2D_2.SetName("h_slices_SV_d_min_nofit")
+    hSV2D_2.Write()
+    ctest.SaveAs(outDir + "/" + "test_SV_d_min.pdf")
     ctest.Write()
 
 
@@ -398,70 +452,30 @@ def plot_SV(outDir):
 
 
 
+    hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
+    events.Draw("TMath::Abs(dR_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
+    hSV2D.SetMaximum(60)
+    hSV2D.SetMinimum(0.000)
+    hSV2D.SetName("h_slices_SV_dR_nofit")
+    hSV2D.Write()
+    ctest.SaveAs(outDir + "/" + "test_SV.pdf")
+    ctest.Write()
 
 
-    # cos(theta) 0.9 - 1
-    h_vertexRecoCosThetaZoom = TH2F("h_vertexRecoCosThetaZoom",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",20,0.9,1,100,-200,200)
-    events.Draw("dR_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosThetaZoom", cut)
-    c_slices_fit_zoom = TCanvas("c_slices_fit_zoom","c_slices_fit_zoom")
-    arr2 = TObjArray()
-    h_vertexRecoCosThetaZoom.FitSlicesY(ff,0,-1,0,"R",arr2)
-    hxi = TH1D(arr2[2])
-    hxi.SetTitle(";cos(#theta);Distance of closest SV to MC B_{s}^{0} vertex [#mum]")
-    hxi.SetName("h_slicesReco_zoom")
-    hxi.Draw()
-    hxi.SetMinimum(0)
-    hxi.SetMaximum(60)
-    c_slices_fit_zoom.SaveAs(outDir + "/" + "Bs_vertex_reco_slices_zoom.pdf")
-    c_slices_fit_zoom.Write()
-    hxi.Write()
+    hSV2D_2 = TProfile("hSV2D_2", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
+    events.Draw("TMath::Abs(d_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
+    hSV2D_2.SetMaximum(60)
+    hSV2D_2.SetMinimum(0.000)
+    hSV2D_2.SetName("h_slices_SV_d_nofit")
+    hSV2D_2.Write()
+    ctest.SaveAs(outDir + "/" + "test_SV_d.pdf")
+    ctest.Write()
 
-    # cos(theta) 0.98 - 1
-    h_vertexRecoCosThetaZoom2 = TH2F("h_vertexRecoCosThetaZoom2",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0.98,1,100,-200,200)
-    events.Draw("dR_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosThetaZoom2", cut)
-    c_slices_fit_zoom2 = TCanvas("c_slices_fit_zoom2","c_slices_fit_zoom2")
-    arr3 = TObjArray()
-    h_vertexRecoCosThetaZoom2.FitSlicesY(ff,0,-1,0,"R",arr3)
-    hxi = TH1D(arr3[2])
-    hxi.SetTitle(";cos(#theta);Distance of closest SV to MC B_{s}^{0} vertex [#mum]")
-    hxi.SetName("h_slicesReco_zoom2")
-    hxi.Draw()
-    hxi.SetMinimum(0)
-    hxi.SetMaximum(150)
-    c_slices_fit_zoom2.SaveAs(outDir + "/" + "Bs_vertex_reco_slices_zoom2.pdf")
-    c_slices_fit_zoom2.Write()
-    hxi.Write()
 
-    ### small theta plot ###
-    cResoCentralForward140mrad = TCanvas("cResoCentralForward140mrad","cResoCentralForward140mrad")
-    hResoCentralForward140mrad = TH1F("hResoCentralForward140mrad","140 mrad < #theta < 150 mrad;Distance of closest SV to MC B_{s}^{0} vertex [#mum];",100,-500,500)
-    events.Draw("dR_min_SV_BsMCDecayVertex >> hResoCentralForward140mrad", cut + " && TMath::Abs(Bs_theta < TMath::Pi()/2 ? Bs_theta : TMath::Pi()-Bs_theta) > 0.14 && TMath::Abs(Bs_theta < TMath::Pi()/2 ? Bs_theta : TMath::Pi()-Bs_theta) <= 0.15")
-    hResoCentralForward140mrad.Fit("ff","l")
-    tt = TLatex()
-    tt.SetTextSize(0.05)
-    tt.DrawLatexNDC(0.15,0.8,"#sigma = {0:.1f} #pm {1:.1f} #mum".format(ff.GetParameter(2), ff.GetParError(2)))
-    cResoCentralForward140mrad.SaveAs(outDir + "/" + "Bs_flight_distance_resoReco_theta140mrad.pdf")
-    cResoCentralForward140mrad.Write()
 
-    cResoCentralForward130mrad = TCanvas("cResoCentralForward130mrad","cResoCentralForward130mrad")
-    hResoCentralForward130mrad = TH1F("hResoCentralForward130mrad","130 mrad < #theta < 140 mrad;Distance of closest SV to MC B_{s}^{0} vertex [#mum];",100,-500,500)
-    events.Draw("dR_min_SV_BsMCDecayVertex >> hResoCentralForward130mrad", cut + " && TMath::Abs(Bs_theta < TMath::Pi()/2 ? Bs_theta : TMath::Pi()-Bs_theta) > 0.130 && TMath::Abs(Bs_theta < TMath::Pi()/2 ? Bs_theta : TMath::Pi()-Bs_theta) <= 0.14")
-    hResoCentralForward130mrad.Fit("ff","l")
-    tt = TLatex()
-    tt.SetTextSize(0.05)
-    tt.DrawLatexNDC(0.15,0.8,"#sigma = {0:.1f} #pm {1:.1f} #mum".format(ff.GetParameter(2), ff.GetParError(2)))
-    cResoCentralForward130mrad.SaveAs(outDir + "/" + "Bs_flight_distance_resoReco_theta130mrad.pdf")
-    cResoCentralForward130mrad.Write()
 
-    cResoCentralForward120mrad = TCanvas("cResoCentralForward120mrad","cResoCentralForward120mrad")
-    hResoCentralForward120mrad = TH1F("hResoCentralForward120mrad","120 mrad < #theta < 130 mrad;Distance of closest SV to MC B_{s}^{0} vertex [#mum];",100,-500,500)
-    events.Draw("dR_min_SV_BsMCDecayVertex >> hResoCentralForward120mrad", cut + " && TMath::Abs(Bs_theta < TMath::Pi()/2 ? Bs_theta : TMath::Pi()-Bs_theta) > 0.120 && TMath::Abs(Bs_theta < TMath::Pi()/2 ? Bs_theta : TMath::Pi()-Bs_theta) <= 0.13")
-    hResoCentralForward120mrad.Fit("ff","l")
-    tt = TLatex()
-    tt.SetTextSize(0.05)
-    tt.DrawLatexNDC(0.15,0.8,"#sigma = {0:.1f} #pm {1:.1f} #mum".format(ff.GetParameter(2), ff.GetParError(2)))
-    cResoCentralForward120mrad.SaveAs(outDir + "/" + "Bs_flight_distance_resoReco_theta120mrad.pdf")
-    cResoCentralForward120mrad.Write()
+
+
 
 if __name__ == "__main__":
 
