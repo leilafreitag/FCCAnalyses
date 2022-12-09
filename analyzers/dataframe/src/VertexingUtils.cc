@@ -704,7 +704,7 @@ ROOT::VecOps::RVec<double> get_dR_SV_obj( ROOT::VecOps::RVec<FCCAnalysesVertex> 
   ROOT::VecOps::RVec<double> result;
   for(auto & ivtx : vertices) {
     TVector3 x_vtx(ivtx.vertex.position[0], ivtx.vertex.position[1], ivtx.vertex.position[2]);
-    result.push_back(1e3*TMath::Sqrt( pow(ivtx.vertex.position[0],2) + pow(ivtx.vertex.position[1],2) + pow(ivtx.vertex.position[2],2) ) - 1e3*TMath::Sqrt( pow(object.x(),2) + pow(object.y(),2) + pow(object.z(),2) ));
+    result.push_back(TMath::Sqrt( pow(ivtx.vertex.position[0],2) + pow(ivtx.vertex.position[1],2) + pow(ivtx.vertex.position[2],2) ) - TMath::Sqrt( pow(object.x(),2) + pow(object.y(),2) + pow(object.z(),2) ));
   }
   return result;
 }
@@ -714,7 +714,7 @@ ROOT::VecOps::RVec<double> get_dR_SV_obj( ROOT::VecOps::RVec<FCCAnalysesVertex> 
 					  edm4hep::Vector3d object) {
   ROOT::VecOps::RVec<double> result;
   for(auto & ivtx : vertices) {
-    result.push_back(1e3*TMath::Sqrt( pow(ivtx.vertex.position[0],2) + pow(ivtx.vertex.position[1],2) + pow(ivtx.vertex.position[2],2) ) - 1e3*TMath::Sqrt( pow(object.x,2) + pow(object.y,2) + pow(object.z,2) ));
+    result.push_back(TMath::Sqrt( pow(ivtx.vertex.position[0],2) + pow(ivtx.vertex.position[1],2) + pow(ivtx.vertex.position[2],2) ) - TMath::Sqrt( pow(object.x,2) + pow(object.y,2) + pow(object.z,2) ));
   }
   return result;
 }
