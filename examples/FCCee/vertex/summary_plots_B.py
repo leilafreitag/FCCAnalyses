@@ -25,6 +25,7 @@ def name_for_legend(name):
     elif name == "R1.3_w30_DSK": new_name = "+ w(8 VTX disc layers) = 30 \mum"
     elif name == "R1.3_w50_DSK": new_name = "+ w(8 VTX disc layers) = 50 \mum"
     elif name == "R1.3_w100_DSK": new_name = "+ w(8 VTX disc layers) = 100 \mum"
+    elif name == "FullSilicon": new_name = "Full Silicon"
     else: new_name = name
     return new_name
 
@@ -87,11 +88,67 @@ def plot_stuff(outDir,input_files,process_name):
     c1.Write()
     c1.Close()
 
+  # FD resol more realistic (adjusted for reconstructed PV, not assuming 0 with smearing anymore. but still assuming we know exactly which track to take)
+
+    stack = THStack("hs",";cos(#theta); Flight distance resolution adj (|R_{reco}-R_{MC}|) [\mum]")
+    hists = list()
+
+    colors_all=[1,2,3,3,4,4,6,6]
+    markers_all=[20,21,20,4,21,25,22,26]
+    colors_1=[1,2,8,4,4]
+    markers_1=[20,21,47,22,26]
+    i=0
+
+    for input_file in input_files:
+        f = TFile(input_file,"READ")
+        name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
+        if name == "standard" or name =="R1.3" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
+            hist = TProfile(f.Get("h_slices_FD_adjusted_for_Reco_PV"))
+            hist.SetName(name)
+            hist.SetTitle(name_for_legend(name))
+            hist.SetMarkerColor(colors_1[i])
+            hist.SetMarkerStyle(markers_1[i])
+            hist.SetLineColor(colors_1[i])
+            #hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(1)
+            hist.SetMarkerSize(0.7)
+            hists.append(hist)
+            stack.Add(hist)
+            i+=1
+
+    c1_2 = TCanvas("c1_2","c1_2")
+    stack.SetMaximum(25)
+    stack.SetMinimum(0)
+    stack.Draw("nostack,e1pl")
+    stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack.GetYaxis().SetLabelSize(0.04)
+    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
+    #stack.GetXaxis().SetTitleSize(0.15)
+    #stack.GetYaxis().ChangeLabel(labSize=30)
+    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendFillColor()
+    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
+
+    tt=TLatex()
+    tt.SetTextSize(0.035)
+    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    gPad.Modified()
+    gPad.Update()
+
+    outfile = outDir+ "/plots.root"
+    outf=TFile.Open(outfile,"RECREATE")
+
+    c1_2.SaveAs(outDir + "/" + "Bs_FD_reso_comparison_from_reco_PV.pdf")
+    c1_2.Write()
+    c1_2.Close()
+
+
 
 
     # SV resol (with no fit) dR_min
 
-    stack = THStack("hs",";cos(#theta); R Distance of closest SV to MC B_{S} vertex [\mum]")
+    stack = THStack("hs",";cos(#theta); Flight distance resolution [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -148,7 +205,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # SV resol (no fit) with just d_min
 
-    stack = THStack("hs",";cos(#theta); Distance of closest SV to MC B_{S} vertex [\mum]")
+    stack = THStack("hs",";cos(#theta); Secondary (B_{S}^{0}) vertex resolution [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -204,8 +261,89 @@ def plot_stuff(outDir,input_files,process_name):
 
 
 
+    # Comparing Standard IDEA (w/ Drift chamber) to Full Silicon
+
+    stack = THStack("hs",";cos(#theta);  Secondary (B_{S}^{0}) vertex resolution [\mum]")
+    hists = list()
+
+    colors_all=[1,2,3,3,4,4,6,6]
+    markers_all=[20,21,20,4,21,25,22,26]
+    colors_1=[1,2,8,4,4]
+    markers_1=[20,21,47,22,26]
+    i=0
+
+    for input_file in input_files:
+        f = TFile(input_file,"READ")
+        name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
+        if name == "standard" or name =="FullSilicon":
+            hist = TProfile(f.Get("h_slices_SV_d_min_nofit"))
+            hist.SetName(name)
+            hist.SetTitle(name_for_legend(name))
+            hist.SetMarkerColor(colors_1[i])
+            hist.SetMarkerStyle(markers_1[i])
+            hist.SetLineColor(colors_1[i])
+            #hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(1)
+            hist.SetMarkerSize(0.7)
+            hists.append(hist)
+            stack.Add(hist)
+            i+=1
+
+    cfull = TCanvas("cfull","cfull")
+    stack.SetMaximum(50)
+    stack.SetMinimum(0)
+    stack.Draw("nostack,e1pl")
+    stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack.GetYaxis().SetLabelSize(0.04)
+    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
+    #stack.GetXaxis().SetTitleSize(0.15)
+    #stack.GetYaxis().ChangeLabel(labSize=30)
+    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendFillColor()
+    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
+
+    tt=TLatex()
+    tt.SetTextSize(0.035)
+    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    gPad.Modified()
+    gPad.Update()
+
+    outfile = outDir+ "/plots.root"
+    outf=TFile.Open(outfile,"RECREATE")
+
+    cfull.SaveAs(outDir + "/" + "Bs_SV_reso_comparison_d_min_fullsilicon.pdf")
+    cfull.Write()
+    cfull.Close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # SV resol (with no fit) dR
+
 
     stack = THStack("hs",";cos(#theta); R Distance of SV to MC B_{S} vertex [\mum]")
     hists = list()
@@ -316,16 +454,6 @@ def plot_stuff(outDir,input_files,process_name):
     c2_2.SaveAs(outDir + "/" + "Bs_SV_reso_comparison_d.pdf")
     c2_2.Write()
     c2_2.Close()
-
-
-
-
-
-
-
-
-
-
 
 
 

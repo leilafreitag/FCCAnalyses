@@ -73,7 +73,6 @@ def vertex_resolution(outDir,events,cut,ff):
 
     #TProfile to make summary plot flight distance reso vs costheta later:
     ctest = TCanvas("FD","FD")
-
     hFD2D = TProfile("hFD2D", "FD Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
     events.Draw("TMath::Abs( TMath::Sqrt(pow(1e3*BsVertex.position.x,2) + pow(1e3*BsVertex.position.y,2) + pow(1e3*BsVertex.position.z,2) ) -TMath::Sqrt(pow(1e3*BsMCDecayVertex.x[0],2) + pow(1e3*BsMCDecayVertex.y[0],2) + pow(1e3*BsMCDecayVertex.z[0],2) )):TMath::Abs(TMath::Cos(Bs_theta))>>hFD2D",cut)
     hFD2D.SetMaximum(25)
@@ -82,6 +81,17 @@ def vertex_resolution(outDir,events,cut,ff):
     hFD2D.Write()
     ctest.SaveAs(outDir + "/" + "test.pdf")
     ctest.Write()
+
+    ctest_2 = TCanvas("FD_2","FD_2")
+    hFD2D_2 = TProfile("hFD2D_2", "FD Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
+    events.Draw("TMath::Abs( TMath::Sqrt(pow(1e3*(BsVertex.position.x-Reco_PrimaryVertex.position.x),2) + pow(1e3*(BsVertex.position.y-Reco_PrimaryVertex.position.y),2) + pow(1e3*(BsVertex.position.z-Reco_PrimaryVertex.position.z),2) ) -TMath::Sqrt(pow(1e3*(BsMCDecayVertex.x[0]-Reco_PrimaryVertex.position.x),2) + pow(1e3*(BsMCDecayVertex.y[0]-Reco_PrimaryVertex.position.y),2) + pow(1e3*(BsMCDecayVertex.z[0]-Reco_PrimaryVertex.position.z),2) )):TMath::Abs(TMath::Cos(Bs_theta))>>hFD2D_2",cut)
+    hFD2D_2.SetMaximum(25)
+    hFD2D_2.SetMinimum(0.000)
+    hFD2D_2.SetName("h_slices_FD_adjusted_for_Reco_PV")
+    hFD2D_2.Write()
+    ctest_2.SaveAs(outDir + "/" + "test_2.pdf")
+    ctest_2.Write()
+
 
 
 
@@ -360,7 +370,7 @@ def plot_SV(outDir):
 
     # cos(theta) 0.0 - 1.0
     h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
-    events.Draw("dR_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    events.Draw("1e3*dR_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
     c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
     arr = TObjArray()
     h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
@@ -377,7 +387,7 @@ def plot_SV(outDir):
 
     #leila edit: absval added
     h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
-    events.Draw("TMath::Abs(dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    events.Draw("1e3*TMath::Abs(dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
     c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
     arr = TObjArray()
     h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
@@ -393,7 +403,7 @@ def plot_SV(outDir):
 
     #leila edit: using not dR but just d
     h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
-    events.Draw("d_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    events.Draw("1e3*d_min_SV_BsMCDecayVertex: TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
     c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
     arr = TObjArray()
     h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
@@ -409,7 +419,7 @@ def plot_SV(outDir):
 
     #leila edit: using not dr but d, and doing the absval thing
     h_vertexRecoCosTheta = TH2F("h_vertexRecoCosTheta",";cos(#theta);Flight distance resolution  (#Delta R_{reco} - #Delta R_{MC}) (#mum)",10,0,1,100,-200,200)
-    events.Draw("TMath::Abs(d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
+    events.Draw("1e3*TMath::Abs(d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> h_vertexRecoCosTheta", cut)
     c_slices_fit = TCanvas("c_slices_fit","c_slices_fit")
     arr = TObjArray()
     h_vertexRecoCosTheta.FitSlicesY(ff,0,-1,0,"R",arr)
@@ -429,7 +439,7 @@ def plot_SV(outDir):
 
 
     hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
-    events.Draw("TMath::Abs(dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
+    events.Draw("TMath::Abs(1e3*dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
     hSV2D.SetMaximum(60)
     hSV2D.SetMinimum(0.000)
     hSV2D.SetName("h_slices_SV_dR_min_nofit")
@@ -439,7 +449,7 @@ def plot_SV(outDir):
 
 
     hSV2D_2 = TProfile("hSV2D_2", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
-    events.Draw("TMath::Abs(d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
+    events.Draw("TMath::Abs(1e3*d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
     hSV2D_2.SetMaximum(60)
     hSV2D_2.SetMinimum(0.000)
     hSV2D_2.SetName("h_slices_SV_d_min_nofit")
@@ -451,9 +461,8 @@ def plot_SV(outDir):
 
 
 
-
     hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
-    events.Draw("TMath::Abs(dR_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
+    events.Draw("TMath::Abs(1e3*dR_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
     hSV2D.SetMaximum(60)
     hSV2D.SetMinimum(0.000)
     hSV2D.SetName("h_slices_SV_dR_nofit")
@@ -463,7 +472,7 @@ def plot_SV(outDir):
 
 
     hSV2D_2 = TProfile("hSV2D_2", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
-    events.Draw("TMath::Abs(d_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
+    events.Draw("TMath::Abs(1e3*d_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
     hSV2D_2.SetMaximum(60)
     hSV2D_2.SetMinimum(0.000)
     hSV2D_2.SetName("h_slices_SV_d_nofit")
@@ -471,6 +480,31 @@ def plot_SV(outDir):
     ctest.SaveAs(outDir + "/" + "test_SV_d.pdf")
     ctest.Write()
 
+
+#MC_PrimaryTracks_RP.momentum.x
+
+
+
+''' #tried to make degrees
+    hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 90, -500, 500)
+    events.Draw("TMath::Abs(dR_SV_BsMCDecayVertex): TMath::Abs(Math::RadToDeg()*Bs_theta) >> hSV2D", cut)
+    hSV2D.SetMaximum(60)
+    hSV2D.SetMinimum(0.000)
+    hSV2D.SetName("h_slices_SV_dR_nofit")
+    hSV2D.Write()
+    ctest.SaveAs(outDir + "/" + "test_SV.pdf")
+    ctest.Write()
+
+
+    hSV2D_2 = TProfile("hSV2D_2", "SV Reso vs. |cos(#theta)|", 10, 0, 90, -500, 500)
+    events.Draw("TMath::Abs(d_SV_BsMCDecayVertex): TMath::Abs(Math::RadToDeg()*Bs_theta) >> hSV2D_2", cut)
+    hSV2D_2.SetMaximum(60)
+    hSV2D_2.SetMinimum(0.000)
+    hSV2D_2.SetName("h_slices_SV_d_nofit")
+    hSV2D_2.Write()
+    ctest.SaveAs(outDir + "/" + "test_SV_d.pdf")
+    ctest.Write()
+'''
 
 
 
