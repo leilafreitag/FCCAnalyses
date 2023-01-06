@@ -480,8 +480,38 @@ def plot_SV(outDir):
     ctest.SaveAs(outDir + "/" + "test_SV_d.pdf")
     ctest.Write()
 
+    
+    #scatterplot of d_min, or d? just to be shown for standard
+    
+    c_scat = TCanvas("c_scat","c_scat")
+    h_scat = TH2F("h_scat",";cos(#theta); Secondary vertex resolution (#mum)",20,0,1,100,-0,500)
+    events.Draw("1e3*d_SV_BsMCDecayVertex:TMath::Abs(TMath::Cos(Bs_theta))>>h_scat",cut)
+    h_scat.SetMaximum(500)
+    h_scat.SetMinimum(0.000)
+    h_scat.Write()
+    c_scat.SaveAs(outDir + "/" + "leila_d_distribution.pdf")
+    c_scat.Write()
+
+
+
+
+
+
 
 #MC_PrimaryTracks_RP.momentum.x
+
+
+    c_mom = TCanvas("c_mom","c_mom")
+    hmom2D = TProfile("hmom2D", "Bs_e vs. |cos(#theta)|", 20, 0, 1, 0, 50)
+    #events.Draw("TMath::Sqrt(pow(MC_PrimaryTracks_RP.momentum.x,2)+pow(MC_PrimaryTracks_RP.momentum.y,2)+pow(MC_PrimaryTracks_RP.momentum.z,2)):TMath::Abs(TMath::Cos(Bs_theta))>>hmom2D")
+    events.Draw("Bs_e:TMath::Abs(TMath::Cos(Bs_theta))>>hmom2D")
+    hmom2D.SetMaximum(50)
+    hmom2D.SetMinimum(0.000)
+    hmom2D.SetName("h_slices_mom")
+    hmom2D.Write()
+
+
+
 
 
 

@@ -25,12 +25,132 @@ def name_for_legend(name):
     elif name == "R1.3_w30_DSK": new_name = "+ w(8 VTX disc layers) = 30 \mum"
     elif name == "R1.3_w50_DSK": new_name = "+ w(8 VTX disc layers) = 50 \mum"
     elif name == "R1.3_w100_DSK": new_name = "+ w(8 VTX disc layers) = 100 \mum"
+    elif name == "R1.3_L1_w30": new_name = "+ w(Layer_{1}) = 30 \mum"
     else: new_name = name
     return new_name
 
 def plot_impact_parameter(outDir,input_files,process_name):
     TH1.AddDirectory(False)
     gStyle.SetErrorX(0)
+
+    gStyle.SetTitleSize(size=0.05, axis="X") #actually works, just for the plot after it. (axis title sizes)
+    gStyle.SetTitleSize(size=0.05, axis="Y")
+    gStyle.SetTitleOffset(offset=0.83, axis="Y")
+    gStyle.SetTitleOffset(offset=0.95, axis="X")
+
+
+    # mom transverse
+
+    stack = THStack("hs",";cos(#theta); MC Transverse Momentum [GeV]")
+    hists = list()
+
+    colors_all=[1,2,3,3,4,4,6,6]
+    markers_all=[20,21,20,4,21,25,22,26]
+    colors_1=[1,2,8,4,4]
+    markers_1=[20,21,47,22,26]
+    i=0
+
+    for input_file in input_files:
+        f = TFile(input_file,"READ")
+        name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
+        if name == "standard" or name =="R1.3" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
+            hist = TProfile(f.Get("h_slices_momt"))
+            hist.SetName(name)
+            hist.SetTitle(name_for_legend(name))
+            hist.SetMarkerColor(colors_1[i])
+            hist.SetMarkerStyle(markers_1[i])
+            hist.SetLineColor(colors_1[i])
+            hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
+            hist.SetMarkerSize(0.7)
+            hists.append(hist)
+            stack.Add(hist)
+            i+=1
+
+    cmomt = TCanvas("cmomt","cmomt")
+    stack.SetMaximum(70)
+    stack.SetMinimum(0.0)
+    stack.Draw("nostack,e1pl")
+    stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack.GetYaxis().SetLabelSize(0.04)
+    #stack.GetXaxis().SetTitleSize(0.15)
+    #stack.GetYaxis().ChangeLabel(labSize=30)
+    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendFillColor()
+    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
+
+    tt=TLatex()
+    tt.SetTextSize(0.04)
+    tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
+    tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
+    gPad.Modified()
+    gPad.Update()
+
+    outfile = outDir+ "/plots.root"
+    outf=TFile.Open(outfile,"RECREATE")
+
+    cmomt.SaveAs(outDir + "/" + "D0_mom_transverse_comparison.pdf")
+    cmomt.Write()
+    cmomt.Close()
+
+    # mom
+
+    stack = THStack("hs",";cos(#theta); MC Momentum [GeV]")
+    hists = list()
+
+    colors_all=[1,2,3,3,4,4,6,6]
+    markers_all=[20,21,20,4,21,25,22,26]
+    colors_1=[1,2,8,4,4]
+    markers_1=[20,21,47,22,26]
+    i=0
+
+    for input_file in input_files:
+        f = TFile(input_file,"READ")
+        name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
+        if name == "standard" or name =="R1.3" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
+            hist = TProfile(f.Get("h_slices_mom"))
+            hist.SetName(name)
+            hist.SetTitle(name_for_legend(name))
+            hist.SetMarkerColor(colors_1[i])
+            hist.SetMarkerStyle(markers_1[i])
+            hist.SetLineColor(colors_1[i])
+            hist.SetLineStyle(linestyles[i])
+            hist.SetLineWidth(0)
+            hist.SetMarkerSize(0.7)
+            hists.append(hist)
+            stack.Add(hist)
+            i+=1
+
+    cmom = TCanvas("cmom","cmom")
+    stack.SetMaximum(60)
+    stack.SetMinimum(20.0)
+    stack.Draw("nostack,e1pl")
+    stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack.GetYaxis().SetLabelSize(0.04)
+    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
+    #stack.GetXaxis().SetTitleSize(0.15)
+    #stack.GetYaxis().ChangeLabel(labSize=30)
+    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendFillColor()
+    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
+
+    tt=TLatex()
+    tt.SetTextSize(0.04)
+    tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
+    tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
+    gPad.Modified()
+    gPad.Update()
+
+    outfile = outDir+ "/plots.root"
+    outf=TFile.Open(outfile,"RECREATE")
+
+    cmom.SaveAs(outDir + "/" + "D0_mom_comparison.pdf")
+    cmom.Write()
+    cmom.Close()
+
+
 
     # D0
     stack = THStack("hs",";cos(#theta); \sigma_{D0} [\mum]")
@@ -65,17 +185,15 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
     stack.GetYaxis().SetLabelSize(0.04) 
-    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
-    #stack.GetXaxis().SetTitleSize(0.15)
-    #stack.GetYaxis().ChangeLabel(labSize=30) 
-    gStyle.SetLegendTextSize(0.035)
+    gStyle.SetLegendTextSize(0.04)
     gStyle.SetLegendBorderSize(0)
     #gStyle.SetLegendFillColor()
-    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
-    
+    gPad.BuildLegend(0.12,0.61,0.36,0.88,"")
+
     tt=TLatex()
-    tt.SetTextSize(0.035)
-    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    tt.SetTextSize(0.04)
+    tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
+    tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
     gPad.Modified()
     gPad.Update()
 
@@ -85,6 +203,9 @@ def plot_impact_parameter(outDir,input_files,process_name):
     c1.SaveAs(outDir + "/" + "D0_comparison.pdf")
     c1.Write()
     c1.Close()
+
+
+
 
     # D0 comparison without disks
     stack_nodisks = THStack("hs_nodisks",";cos(#theta); \sigma_{D0} [\mum]")
@@ -119,9 +240,11 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack_nodisks.SetMaximum(4.5)
     stack_nodisks.SetMinimum(1.75)
     stack_nodisks.Draw("nostack,e1pl")
-    gPad.BuildLegend(0.15,0.6,0.3,0.88,"") #x1 y1 x2 y2 coordinates of legend
+    stack_nodisks.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack_nodisks.GetYaxis().SetLabelSize(0.04)
+    gPad.BuildLegend(0.12,0.61,0.36,0.88,"") #x1 y1 x2 y2 coordinates of legend
 
-    gStyle.SetLegendTextSize(0.03)
+
     #AddText(0.5,0.5,"IDEA Delphes Simulation")
 
     outfile = outDir+ "/plots.root"
@@ -163,11 +286,15 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack_disks.SetMaximum(3.2)
     stack_disks.SetMinimum(1.8)
     stack_disks.Draw("nostack,e1pl")
+    stack_disks.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack_disks.GetYaxis().SetLabelSize(0.04)
     gPad.BuildLegend(0.30,0.6,0.45,0.88,"") #x1 y1 x2 y2 coordinates of legend
 
+
     tt=TLatex()
-    tt.SetTextSize(0.035)
-    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    tt.SetTextSize(0.04)
+    tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
+    tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
     gPad.Modified()
     gPad.Update()
 
@@ -245,17 +372,15 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
     stack.GetYaxis().SetLabelSize(0.04)
-    #gStyle.SetTitleSize(0.02, axis="X") #not working, doesnt change anything
-    #stack.GetXaxis().SetTitleSize(0.15)
-    #stack.GetYaxis().ChangeLabel(labSize=30)
     gStyle.SetLegendTextSize(0.035)
-    gStyle.SetLegendBorderSize(0)
+    #gStyle.SetLegendBorderSize(0)
     #gStyle.SetLegendFillColor()
     gPad.BuildLegend(0.25,0.65,0.4,0.88,"")
 
     tt=TLatex()
-    tt.SetTextSize(0.035)
-    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    tt.SetTextSize(0.04)
+    tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
+    tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
     gPad.Modified()
     gPad.Update()
 
@@ -300,6 +425,8 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack2_nodisks.SetMaximum(7)
     stack2_nodisks.SetMinimum(1.5)
     stack2_nodisks.Draw("nostack,e1pl")
+    stack2_nodisks.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack2_nodisks.GetYaxis().SetLabelSize(0.04)
     gPad.BuildLegend(0.26,0.6,0.45,0.88,"")
     outfile = outDir+ "/plots.root"
     outf=TFile.Open(outfile,"RECREATE")
@@ -341,11 +468,15 @@ def plot_impact_parameter(outDir,input_files,process_name):
     stack_disks.SetMaximum(7)
     stack_disks.SetMinimum(1.5)
     stack_disks.Draw("nostack,e1pl")
+    stack_disks.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
+    stack_disks.GetYaxis().SetLabelSize(0.04)
+    gStyle.SetLegendTextSize(0.04)
     gPad.BuildLegend(0.30,0.6,0.45,0.88,"") #x1 y1 x2 y2 coordinates of legend
 
     tt=TLatex()
-    tt.SetTextSize(0.035)
-    tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
+    tt.SetTextSize(0.04)
+    tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
+    tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
     gPad.Modified()
     gPad.Update()
 

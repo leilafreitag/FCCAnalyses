@@ -1,3 +1,5 @@
+#edited just to replot and look just at 0.5GeV
+
 import sys, argparse, os
 import ROOT
 from ROOT import gROOT,TFile,TCanvas,TH1F,TH2F,TProfile,TStyle,gStyle,TLatex,TPad,gPad,TCut,TLegend,TF1,TMath,TObjArray,TH1D,THStack,TH1,TPaveText,TText,TGraph,TMultiGraph,TGraphErrors
@@ -70,7 +72,7 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
             g_temp.SetMarkerStyle(markers[i])
             #g_temp.SetLineColor(colors[i])
             #g_temp.SetLineStyle(linestyles[i])
-            g_temp.SetLineWidth(0)
+            g_temp.SetLineWidth(1)
             if nameToSave =="all_mom":
                 g_temp.SetMarkerColorAlpha(colors[i],0.7)
                 g_temp.SetMarkerSize(0.7)
@@ -83,7 +85,7 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
     gStyle.SetPadTickY(1)
     #gStyle.SetPadTickX(1)
     c1_gun = TCanvas("c1_gun","c1_gun")
-    mg.SetMaximum(1000.0)
+    mg.SetMaximum(5000.0)
     mg.SetMinimum(1.)
     mg.Draw("AP")
     #mg.Draw("AP,nostack,e1pl")
@@ -110,7 +112,6 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
     tt=TLatex()
     tt.SetTextSize(0.035)
     tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
-    tt.DrawLatexNDC(0.14,0.915,"#bf{Particle gun muons}")
     if len(geometries) == 1:
         if geometries[0] == "standard":
             tt.DrawLatexNDC(x_left,0.85,"#bf{Standard IDEA: R(Layer_{1}) = 1.7 cm, w(VTX layers) = 280 \mum}")
@@ -160,7 +161,7 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
             i+=1
 
     c2_gun = TCanvas("c2_gun","c2_gun")
-    mg.SetMaximum(3000.0)
+    mg.SetMaximum(50000.0)
     mg.SetMinimum(1.)
     mg.Draw("AP")
     #mg.Draw("nostack,e1pl")
@@ -190,7 +191,6 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
     tt=TLatex()
     tt.SetTextSize(0.035)
     tt.DrawLatexNDC(0.63,0.915,"#it{IDEA Delphes simulation}")
-    tt.DrawLatexNDC(0.14,0.915,"#bf{Particle gun muons}")
     if len(geometries) == 1:
         if geometries[0] == "standard":
             tt.DrawLatexNDC(x_left,0.85,"#bf{Standard IDEA: R(Layer_{1}) = 1.7 cm, w(VTX layers) = 280 \mum}")
@@ -289,12 +289,14 @@ if __name__ == "__main__":
     
 
     if args.analysis=="impact_parameter": 
-        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w30"],[1,10,100],"all_mom",[1,1,1,2,2,2,4,4,4],[20,21,26,20,21,26,20,21,26])
+        #plot_impact_parameter(outDir,["standard","R1.3","R1.3_w30"],[1,10,100],"all_mom",[1,1,1,2,2,2,4,4,4],[20,21,26,20,21,26,20,21,26])
 
-        plot_impact_parameter(outDir,["R1.3_w100","R1.3_w100_DSK"],[1,10,100],"DSK_vs_noDSK",[1,1,2,2,4,4],[20,4,21,25,22,26])
-        plot_impact_parameter(outDir,["R1.3_w30","R1.3_w30_DSK"],[1,10,100],"DSK_vs_noDSK_30",[1,1,2,2,4,4],[20,4,21,25,22,26])
-        plot_impact_parameter(outDir,["standard"],[1,10,100],"standard",[1,2,4],[20,21,22])
-        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[1],"1GeV",[1,2,8,4,4],[20,21,47,22,26])
-        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[10],"10GeV",[1,2,8,4,4],[20,21,47,22,26])
-        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[100],"100GeV",[1,2,8,4,4],[20,21,47,22,26])
+        #plot_impact_parameter(outDir,["R1.3_w100","R1.3_w100_DSK"],[1,10,100],"DSK_vs_noDSK",[1,1,2,2,4,4],[20,4,21,25,22,26])
+        #plot_impact_parameter(outDir,["R1.3_w30","R1.3_w30_DSK"],[1,10,100],"DSK_vs_noDSK_30",[1,1,2,2,4,4],[20,4,21,25,22,26])
+        #plot_impact_parameter(outDir,["standard"],[1,10,100],"standard",[1,2,4],[20,21,22])
+        #plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[1],"1GeV",[1,2,8,4,4],[20,21,47,22,26])
+        #plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[10],"10GeV",[1,2,8,4,4],[20,21,47,22,26])
+        #plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[100],"100GeV",[1,2,8,4,4],[20,21,47,22,26])
+        
 
+        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w100","R1.3_w30","R1.3_w30_DSK"],[0.5],"0.5GeV",[1,2,8,4,4],[20,21,47,22,26])

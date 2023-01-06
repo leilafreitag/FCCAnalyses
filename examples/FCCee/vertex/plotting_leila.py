@@ -73,6 +73,23 @@ def plot_raw(outDir):
     hD02D_zoom.Write()
 
 
+    c_mom = TCanvas("c_mom","c_mom")
+    hmom2D = TProfile("hmom2D", "RP_MC_p vs. |cos(#theta)|", 20, 0, 1, 0, 50)
+    events.Draw("RP_MC_p:TMath::Abs(TMath::Cos(RP_theta))>>hmom2D")
+    hmom2D.SetMaximum(50)
+    hmom2D.SetMinimum(0.000)
+    hmom2D.SetName("h_slices_mom")
+    hmom2D.Write()
+
+    c_momt = TCanvas("c_momt","c_momt")
+    hmomt2D = TProfile("hmomt2D", "RP_MC_p vs. |cos(#theta)|", 20, 0, 1, 0, 50)
+    events.Draw("TMath::Sqrt(RP_MC_px^2+ RP_MC_py^2):TMath::Abs(TMath::Cos(RP_theta))>>hmomt2D")
+    hmomt2D.SetMaximum(50)
+    hmomt2D.SetMinimum(0.000)
+    hmomt2D.SetName("h_slices_momt")
+    hmomt2D.Write()
+
+
     # Z0 :
     cleila = TCanvas("RP_TRK_Z0","RP_TRK_Z0")
     cleila.Divide(2,1)
