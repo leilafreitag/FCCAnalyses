@@ -440,7 +440,7 @@ def plot_SV(outDir):
 
     hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
     events.Draw("TMath::Abs(1e3*dR_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
-    hSV2D.SetMaximum(60)
+    hSV2D.SetMaximum(100)
     hSV2D.SetMinimum(0.000)
     hSV2D.SetName("h_slices_SV_dR_min_nofit")
     hSV2D.Write()
@@ -450,7 +450,7 @@ def plot_SV(outDir):
 
     hSV2D_2 = TProfile("hSV2D_2", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
     events.Draw("TMath::Abs(1e3*d_min_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D_2", cut)
-    hSV2D_2.SetMaximum(60)
+    hSV2D_2.SetMaximum(100)
     hSV2D_2.SetMinimum(0.000)
     hSV2D_2.SetName("h_slices_SV_d_min_nofit")
     hSV2D_2.Write()
@@ -463,7 +463,7 @@ def plot_SV(outDir):
 
     hSV2D = TProfile("hSV2D", "SV Reso vs. |cos(#theta)|", 10, 0, 1, -500, 500)
     events.Draw("TMath::Abs(1e3*dR_SV_BsMCDecayVertex): TMath::Abs(TMath::Cos(Bs_theta)) >> hSV2D", cut)
-    hSV2D.SetMaximum(60)
+    hSV2D.SetMaximum(100)
     hSV2D.SetMinimum(0.000)
     hSV2D.SetName("h_slices_SV_dR_nofit")
     hSV2D.Write()

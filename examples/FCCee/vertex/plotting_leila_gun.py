@@ -28,16 +28,47 @@ def plot_raw(outDir):
     c_D0.SaveAs(outDir + "/" + "D0_histogram.pdf")
     c_D0.Write()
 
-    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0")
-    cleila1.Divide(2,1)
-    cleila1.cd(1)
-    h1 = TH1F("h1", "RP_TRK_D0;D0 [\mum]",100,-50,50)
+
+    gStyle.SetStatW(0.38)
+    gStyle.SetStatH(0.2)
+    gStyle.SetLabelSize(0.05,"xy") #0.035
+    gStyle.SetTitleSize(0.05,"xy")
+    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0",0,0,600,500)
+    #cleila1.Divide(2,1)
+    cleila1.SetLeftMargin(0.12)
+    cleila1.SetBottomMargin(0.12)
+    #cleila1.cd(1)
+    h1 = TH1F("h1", ";D_{0} [\mum]",100,-50,50)
     events.Draw("1e3*RP_TRK_D0>>h1","TMath::Abs(RP_TRK_D0)<0.1")
-    cleila1.cd(2)
-    h2 = TH1F("h2", "Sqrt(RP_TRK_D0_cov);\sigma_{D0} [\mum]",1000,0,1000)
-    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov)>>h2","TMath::Sqrt(RP_TRK_D0_cov) < 1e+1")
     cleila1.SaveAs(outDir + "/" + "RP_TRK_D0_leila.pdf")
     cleila1.Write()
+
+    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0",0,0,600,500)
+    cleila1.SetLeftMargin(0.12)
+    cleila1.SetBottomMargin(0.12)
+    #cleila1.cd(2)
+    h1.GetXaxis().SetLabelSize(0.04)
+    h1.GetYaxis().SetLabelSize(0.04)
+    h2 = TH1F("h2", ";\sigma_{D_{0}} [\mum]",100,0,10)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov)>>h2","TMath::Sqrt(RP_TRK_D0_cov) < 1e+1")
+#    h2.GetXaxis().SetLabelSize(0.05)
+#    h2.GetYaxis().SetLabelSize(0.05)
+    cleila1.SaveAs(outDir + "/" + "RP_TRK_sig_D0_leila.pdf")
+    cleila1.Write()
+
+
+
+   # cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0")
+   # cleila1.Divide(2,1)
+   # cleila1.cd(1)
+   # h1 = TH1F("h1", "RP_TRK_D0;D0 [\mum]",100,-50,50)
+   # events.Draw("1e3*RP_TRK_D0>>h1","TMath::Abs(RP_TRK_D0)<0.1")
+   # cleila1.cd(2)
+   # h2 = TH1F("h2", "Sqrt(RP_TRK_D0_cov);\sigma_{D0} [\mum]",1000,0,1000)
+   # events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov)>>h2","TMath::Sqrt(RP_TRK_D0_cov) < 1e+1")
+   # cleila1.SaveAs(outDir + "/" + "RP_TRK_D0_leila.pdf")
+   # cleila1.Write()
+
 
     #Average D0 resolution vs theta data point, for comparison with other in summary plots
     p = TProfile("p", "Sqrt(RP_TRK_D0_cov) vs. |#theta|", 10000, 5, 95, 1, 1000) 

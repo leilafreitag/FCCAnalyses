@@ -12,12 +12,16 @@ def parse_arguments(argv=None):
         return parser.parse_args(argv)
 
 def plot_raw(outDir):
+    muons_cut = "TMath::Abs(RP_MC_pdg)==13"
+    gStyle.SetTitleSize(size=0.05, axis="X") #actually works, just for the plot after it. (axis title sizes)
+    gStyle.SetTitleSize(size=0.05, axis="Y")
     # D0 :
 
     #Histogram of D0
     c_D0 = TCanvas("testname","testtitle",200,10,700,900)
+    c_D0.SetBottomMargin(0.5)
     h_D0 = TH1F("h_D0", ";D_{0} [\mum]",100,-50,50) #name,title,numbins,bounds?
-    events.Draw("1e3*RP_TRK_D0>>h_D0","TMath::Abs(RP_TRK_D0)<0.1")
+    events.Draw("1e3*RP_TRK_D0>>h_D0","TMath::Abs(RP_TRK_D0)<0.1 && TMath::Abs(RP_MC_pdg)==13")
     #s = (TPaveStats)h_D0.GetListOfFunctions().FindObject("stats");
     #s.SetX1NDC(.1);
     #s.SetX2NDC(.6);
@@ -26,17 +30,29 @@ def plot_raw(outDir):
 
     gStyle.SetStatW(0.38)
     gStyle.SetStatH(0.2)
-    gStyle.SetLabelSize(0.035,"xy")
+    gStyle.SetLabelSize(0.05,"xy") #0.035
     gStyle.SetTitleSize(0.05,"xy")
-    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0")
-    cleila1.Divide(2,1)
-    cleila1.cd(1)
-    h1 = TH1F("h1", ";D0 [\mum]",100,-50,50)
-    events.Draw("1e3*RP_TRK_D0>>h1","TMath::Abs(RP_TRK_D0)<0.1")
-    cleila1.cd(2)
-    h2 = TH1F("h2", ";\sigma_{D0} [\mum]",100,0,10)
-    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov)>>h2","TMath::Sqrt(RP_TRK_D0_cov) < 1e+1")
+    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0",0,0,600,500)
+    #cleila1.Divide(2,1)
+    cleila1.SetLeftMargin(0.12)
+    cleila1.SetBottomMargin(0.12)
+    #cleila1.cd(1)
+    h1 = TH1F("h1", ";D_{0} [\mum]",100,-50,50)
+    events.Draw("1e3*RP_TRK_D0>>h1","TMath::Abs(RP_TRK_D0)<0.1 && TMath::Abs(RP_MC_pdg)==13")
     cleila1.SaveAs(outDir + "/" + "RP_TRK_D0_leila.pdf")
+    cleila1.Write()
+
+    cleila1 = TCanvas("RP_TRK_D0","RP_TRK_D0",0,0,600,500)
+    cleila1.SetLeftMargin(0.12)
+    cleila1.SetBottomMargin(0.12)
+    #cleila1.cd(2)
+    h1.GetXaxis().SetLabelSize(0.04)
+    h1.GetYaxis().SetLabelSize(0.04)
+    h2 = TH1F("h2", ";\sigma_{D_{0}} [\mum]",100,0,10)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov)>>h2","TMath::Sqrt(RP_TRK_D0_cov) < 1e+1 && TMath::Abs(RP_MC_pdg)==13")
+#    h2.GetXaxis().SetLabelSize(0.05)
+#    h2.GetYaxis().SetLabelSize(0.05)
+    cleila1.SaveAs(outDir + "/" + "RP_TRK_sig_D0_leila.pdf")
     cleila1.Write()
 
 
@@ -56,8 +72,15 @@ def plot_raw(outDir):
     events.Draw("RP_TRK_D0 / TMath::Sqrt(RP_TRK_D0_cov)>>h3")  # sigma = 1 as it should
 
     c1.cd(4)
-    hD02D = TProfile("hD02D", "Sqrt(RP_TRK_D0_cov) vs. |cos(#theta)|", 20, 0, 1, 0, 20)
-    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov):TMath::Abs(TMath::Cos(RP_theta))>>hD02D")
+    hD02D = TProfile("hD02D", "Sqrt(RP_TRK_D0_cov) vs. |#theta|", 20, 5, 90, 0, 20)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov):TMath::Abs(RP_theta*180/(TMath::Pi()))>>hD02D",muons_cut)
+
+#    hD02D = TProfile("hD02D", "Sqrt(RP_TRK_D0_cov) vs. cos(#theta)", 20, -1, 1, 0, 20)
+#    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov):TMath::Cos(RP_theta)>>hD02D")
+
+#    hD02D = TProfile("hD02D", "Sqrt(RP_TRK_D0_cov) vs. #theta", 20, 0, 180, 0, 20)
+#    events.Draw("1e3*TMath::Sqrt(RP_TRK_D0_cov):RP_theta*180/(TMath::Pi())>>hD02D")
+
     hD02D.SetMaximum(10)
     hD02D.SetMinimum(0.000)
     #hD02D.GetXaxis().SetRangeUser(0,1.2)
@@ -75,7 +98,7 @@ def plot_raw(outDir):
 
     c_mom = TCanvas("c_mom","c_mom")
     hmom2D = TProfile("hmom2D", "RP_MC_p vs. |cos(#theta)|", 20, 0, 1, 0, 50)
-    events.Draw("RP_MC_p:TMath::Abs(TMath::Cos(RP_theta))>>hmom2D")
+    events.Draw("RP_MC_p:TMath::Abs(TMath::Cos(RP_theta))>>hmom2D", muons_cut) #"RP_MC_pdg==13"
     hmom2D.SetMaximum(50)
     hmom2D.SetMinimum(0.000)
     hmom2D.SetName("h_slices_mom")
@@ -83,7 +106,7 @@ def plot_raw(outDir):
 
     c_momt = TCanvas("c_momt","c_momt")
     hmomt2D = TProfile("hmomt2D", "RP_MC_p vs. |cos(#theta)|", 20, 0, 1, 0, 50)
-    events.Draw("TMath::Sqrt(RP_MC_px^2+ RP_MC_py^2):TMath::Abs(TMath::Cos(RP_theta))>>hmomt2D")
+    events.Draw("TMath::Sqrt(RP_MC_px^2+ RP_MC_py^2):TMath::Abs(TMath::Cos(RP_theta))>>hmomt2D", "RP_MC_pdg==13")
     hmomt2D.SetMaximum(50)
     hmomt2D.SetMinimum(0.000)
     hmomt2D.SetName("h_slices_momt")
@@ -91,18 +114,28 @@ def plot_raw(outDir):
 
 
     # Z0 :
-    cleila = TCanvas("RP_TRK_Z0","RP_TRK_Z0")
-    cleila.Divide(2,1)
+    cleila = TCanvas("RP_TRK_Z0","RP_TRK_Z0",0,0,600,500)
+    #cleila.Divide(2,1)
 
-    cleila.cd(1)
-    h4 = TH1F("h4",";Z0 [\mum]",100,-1500,1500)
-    events.Draw("1e3*RP_TRK_Z0>>h4")
-
-    cleila.cd(2)
-    h5 = TH1F("h5",";\sigma_{Z0} [\mum]",100,0,30)
-    events.Draw("1e3*TMath::Sqrt(RP_TRK_Z0_cov)>>h5")
-
+    #cleila.cd(1)
+    h4 = TH1F("h4",";Z_{0} [\mum]",100,-1500,1500)
+    events.Draw("1e3*RP_TRK_Z0>>h4", muons_cut)
+    h4.GetXaxis().SetLabelSize(0.05)
+    h4.GetYaxis().SetLabelSize(0.05)
+    cleila.SetLeftMargin(0.12)
+    cleila.SetBottomMargin(0.12)
     cleila.SaveAs(outDir + "/" + "RP_TRK_Z0_leila.pdf")
+    cleila.Write()
+
+    cleila = TCanvas("RP_TRK_Z0","RP_TRK_Z0",0,0,600,500)
+    #cleila.cd(2)
+    h5 = TH1F("h5",";\sigma_{Z_{0}} [\mum]",100,0,30)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_Z0_cov)>>h5", "TMath::Abs(RP_MC_pdg)==13")
+    h5.GetXaxis().SetLabelSize(0.05)
+    h5.GetYaxis().SetLabelSize(0.05)
+    cleila.SetLeftMargin(0.12)
+    cleila.SetBottomMargin(0.12)
+    cleila.SaveAs(outDir + "/" + "RP_TRK_sig_Z0_leila.pdf")
     cleila.Write()
 
 
@@ -123,8 +156,9 @@ def plot_raw(outDir):
     events.Draw("RP_TRK_Z0 / TMath::Sqrt(RP_TRK_Z0_cov)>>h6")
 
     c2.cd(4)
-    hZ02D = TProfile("hZ02D", "Sqrt(RP_TRK_Z0_cov) vs. |cos(#theta)|", 20, 0, 1, 0, 20)
-    events.Draw("1e3*TMath::Sqrt(RP_TRK_Z0_cov):TMath::Abs(TMath::Cos(RP_theta))>>hZ02D")
+    hZ02D = TProfile("hZ02D", "Sqrt(RP_TRK_Z0_cov) vs. |#theta|", 20, 5, 90, 0, 50)
+    events.Draw("1e3*TMath::Sqrt(RP_TRK_Z0_cov):TMath::Abs(RP_theta*180/(TMath::Pi()))>>hZ02D", muons_cut)
+ 
     hZ02D.SetMaximum(20)
     hZ02D.SetMinimum(0.000)
     hZ02D.SetName("h_slices_Z0")

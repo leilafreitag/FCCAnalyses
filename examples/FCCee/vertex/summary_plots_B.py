@@ -27,6 +27,7 @@ def name_for_legend(name):
     elif name == "R1.3_w50_DSK": new_name = "+ w(8 VTX disc layers) = 50 \mum"
     elif name == "R1.3_w100_DSK": new_name = "+ w(8 VTX disc layers) = 100 \mum"
     elif name == "FullSilicon": new_name = "Full Silicon"
+    elif name == "R1.3_L1_w30": new_name = "+ w(Layer_{1}) = 30 \mum"
     else: new_name = name
     return new_name
 
@@ -71,9 +72,11 @@ def plot_stuff(outDir,input_files,process_name):
     TH1.AddDirectory(False)
     gStyle.SetErrorX(0)
 
+    colors_L=[1,2,6,8,4,4]
+    markers_L=[20,21,24,47,22,26]
 
     # FD resol for standard - compare with and without using reconstructed primary vertex
-    stack = THStack("hs",";cos(#theta); Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -113,7 +116,7 @@ def plot_stuff(outDir,input_files,process_name):
             i+=1
 
     cs = TCanvas("cs","cs")
-    stack.SetMaximum(25)
+    stack.SetMaximum(35)
     stack.SetMinimum(0)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
@@ -146,7 +149,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # FD resol    
 
-    stack = THStack("hs",";cos(#theta); Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -204,7 +207,7 @@ def plot_stuff(outDir,input_files,process_name):
 
   # FD resol more realistic (adjusted for reconstructed PV, not assuming 0 with smearing anymore. but still assuming we know exactly which track to take)
 
-    stack = THStack("hs",";cos(#theta); Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -231,7 +234,7 @@ def plot_stuff(outDir,input_files,process_name):
             i+=1
 
     c1_2 = TCanvas("c1_2","c1_2")
-    stack.SetMaximum(25)
+    stack.SetMaximum(60)#25
     stack.SetMinimum(0)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
@@ -265,7 +268,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # FD resol (with no fit) dR_min
 
-    stack = THStack("hs",";cos(#theta); Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -274,8 +277,10 @@ def plot_stuff(outDir,input_files,process_name):
     markers_1=[20,21,47,22,26]
     i=0
 
-    vals_R13, vals_R13_w30, vals_R13_w30_DSK, vals_R13_w100 = [],[],[],[]
-    errs_R13,errs_R13_w30,errs_R13_w30_DSK,errs_R13_w100 = [],[],[],[]
+    vals_std, vals_R13, vals_R13_w30, vals_R13_w30_DSK, vals_R13_w100 = [],[],[],[],[]
+    errs_std, errs_R13, errs_R13_w30, errs_R13_w30_DSK, errs_R13_w100 = [],[],[],[],[]
+    #vals_std, vals_R13, vals_R13_w30, vals_R13_w30_DSK, vals_R13_w100, vals_R13_L1_w30 = [],[],[],[],[],[]
+    #errs_std, errs_R13, errs_R13_w30, errs_R13_w30_DSK, errs_R13_w100, errs_R13_L1_w30 = [],[],[],[],[],[]
 
     for input_file in input_files:
         f = TFile(input_file,"READ")
@@ -286,6 +291,9 @@ def plot_stuff(outDir,input_files,process_name):
             #Getting the numbers for percent improvement calculation
             for bin in range(1,11):
                 print(name, bin, hist.GetBinContent(bin), hist.GetBinError(bin))
+                if name == "standard":
+                    vals_std.append(hist.GetBinContent(bin))
+                    errs_std.append(hist.GetBinError(bin))
                 if name == "R1.3":
                     vals_R13.append(hist.GetBinContent(bin))
                     errs_R13.append(hist.GetBinError(bin))
@@ -298,6 +306,9 @@ def plot_stuff(outDir,input_files,process_name):
                 if name == "R1.3_w100":
                     vals_R13_w100.append(hist.GetBinContent(bin))
                     errs_R13_w100.append(hist.GetBinError(bin))
+                if name == "R1.3_L1_w30":
+                    vals_R13_L1_w30.append(hist.GetBinContent(bin))
+                    errs_R13_L1_w30.append(hist.GetBinError(bin))
 
             hist.SetName(name)
             hist.SetTitle(name_for_legend(name))
@@ -313,17 +324,38 @@ def plot_stuff(outDir,input_files,process_name):
 
     #Calc average percent changes
 
-    print("average percent change of FD reso from R1.3 to w100:", calc_percent_change(vals_R13,vals_R13_w100,errs_R13,errs_R13_w100)[0], \
+    print("average percent change of FD reso from standard to R1.3:", \
+      calc_percent_change(vals_std,vals_R13,errs_std,errs_R13)[0], \
+      "with error", calc_percent_change(vals_std,vals_R13,errs_std,errs_R13)[1])
+
+#    print("average percent change of FD reso from R1.3 to L1_w30:", \
+#      calc_percent_change(vals_R13,vals_R13_L1_w30,errs_R13,errs_R13_L1_w30)[0], \
+#      "with error", calc_percent_change(vals_R13,vals_R13_L1_w30,errs_R13,errs_R13_L1_w30)[1])
+
+    print("average percent change of FD reso from R1.3 to w100:", \
+      calc_percent_change(vals_R13,vals_R13_w100,errs_R13,errs_R13_w100)[0], \
       "with error", calc_percent_change(vals_R13,vals_R13_w100,errs_R13,errs_R13_w100)[1])
 
-    print("average percent change of FD reso from R1.3 to w30:", calc_percent_change(vals_R13,vals_R13_w30,errs_R13,errs_R13_w30)[0], \
+    print("average percent change of FD reso from R1.3 to w30:", \
+      calc_percent_change(vals_R13,vals_R13_w30,errs_R13,errs_R13_w30)[0], \
       "with error", calc_percent_change(vals_R13,vals_R13_w30,errs_R13,errs_R13_w30)[1])
 
-    print("average percent change of FD reso from R1.3 to w30_DSK:", calc_percent_change(vals_R13,vals_R13_w30_DSK,errs_R13,errs_R13_w30_DSK)[0], \
+    print("average percent change of FD reso from R1.3 to w30_DSK:", \
+      calc_percent_change(vals_R13,vals_R13_w30_DSK,errs_R13,errs_R13_w30_DSK)[0], \
       "with error", calc_percent_change(vals_R13,vals_R13_w30_DSK,errs_R13,errs_R13_w30_DSK)[1])
 
+    print("average percent change of FD reso from w100 to w30:", \
+      calc_percent_change(vals_R13_w100,vals_R13_w30,errs_R13_w100,errs_R13_w30)[0], \
+      "with error", calc_percent_change(vals_R13_w100,vals_R13_w30,errs_R13_w100,errs_R13_w30)[1])
+
+    print("average percent change of FD reso from w30 to w30_DSK:", \
+      calc_percent_change(vals_R13_w30,vals_R13_w30_DSK,errs_R13_w30,errs_R13_w30_DSK)[0], \
+      "with error", calc_percent_change(vals_R13_w30,vals_R13_w30_DSK,errs_R13_w30,errs_R13_w30)[1])
+
+
+
     c2 = TCanvas("c2","c2")
-    stack.SetMaximum(50)
+    stack.SetMaximum(60)
     stack.SetMinimum(0)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
@@ -352,9 +384,11 @@ def plot_stuff(outDir,input_files,process_name):
 
 
 
+
+
     # SV resol (no fit) with just d_min
 
-    stack = THStack("hs",";cos(#theta); Secondary vertex (B_{S}^{0}) resolution [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Secondary vertex (B_{S}^{0}) resolution [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -363,16 +397,44 @@ def plot_stuff(outDir,input_files,process_name):
     markers_1=[20,21,47,22,26]
     i=0
 
+    vals_std, vals_R13, vals_R13_w30, vals_R13_w30_DSK, vals_R13_w100, vals_R13_L1_w30 = [],[],[],[],[],[]
+    errs_std, errs_R13, errs_R13_w30, errs_R13_w30_DSK, errs_R13_w100, errs_R13_L1_w30 = [],[],[],[],[],[]
+#    vals_std, vals_R13, vals_R13_w30, vals_R13_w30_DSK, vals_R13_w100 = [],[],[],[],[]
+#    errs_std, errs_R13, errs_R13_w30, errs_R13_w30_DSK, errs_R13_w100 = [],[],[],[],[]
+
     for input_file in input_files:
         f = TFile(input_file,"READ")
         name = input_file.split("_plots/plots.root")[0].split(process_name)[-1]
-        if name == "standard" or name =="R1.3" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
+        if name == "standard" or name =="R1.3" or  name =="R1.3_L1_w30" or name =="R1.3_w100" or name =="R1.3_w30" or name=="R1.3_w30_DSK":
             hist = TProfile(f.Get("h_slices_SV_d_min_nofit"))
+            #Getting the numbers for percent improvement calculation
+
+            for bin in range(1,11):
+                print(name, bin, hist.GetBinContent(bin), hist.GetBinError(bin))
+                if name == "standard":
+                    vals_std.append(hist.GetBinContent(bin))
+                    errs_std.append(hist.GetBinError(bin))
+                if name == "R1.3":
+                    vals_R13.append(hist.GetBinContent(bin))
+                    errs_R13.append(hist.GetBinError(bin))
+                if name == "R1.3_w30":
+                    vals_R13_w30.append(hist.GetBinContent(bin))
+                    errs_R13_w30.append(hist.GetBinError(bin))
+                if name == "R1.3_w30_DSK":
+                    vals_R13_w30_DSK.append(hist.GetBinContent(bin))
+                    errs_R13_w30_DSK.append(hist.GetBinError(bin))
+                if name == "R1.3_w100":
+                    vals_R13_w100.append(hist.GetBinContent(bin))
+                    errs_R13_w100.append(hist.GetBinError(bin))
+                if name == "R1.3_L1_w30":
+                    vals_R13_L1_w30.append(hist.GetBinContent(bin))
+                    errs_R13_L1_w30.append(hist.GetBinError(bin))
+
             hist.SetName(name)
             hist.SetTitle(name_for_legend(name))
-            hist.SetMarkerColor(colors_1[i])
-            hist.SetMarkerStyle(markers_1[i])
-            hist.SetLineColor(colors_1[i])
+            hist.SetMarkerColor(colors_L[i])
+            hist.SetMarkerStyle(markers_L[i])
+            hist.SetLineColor(colors_L[i])
             #hist.SetLineStyle(linestyles[i])
             hist.SetLineWidth(1)
             hist.SetMarkerSize(0.7)
@@ -380,8 +442,71 @@ def plot_stuff(outDir,input_files,process_name):
             stack.Add(hist)
             i+=1
 
+
+    #Calc average percent changes
+
+    print("average percent change of SV reso from standard to R1.3:", \
+      calc_percent_change(vals_std,vals_R13,errs_std,errs_R13)[0], \
+      "with error", calc_percent_change(vals_std,vals_R13,errs_std,errs_R13)[1])
+
+    print("average percent change of SV reso from R1.3 to L1_w30:", \
+      calc_percent_change(vals_R13,vals_R13_L1_w30,errs_R13,errs_R13_L1_w30)[0], \
+      "with error", calc_percent_change(vals_R13,vals_R13_L1_w30,errs_R13,errs_R13_L1_w30)[1])
+ 
+    print("average percent change of SV reso from R1.3 to w100:", \
+      calc_percent_change(vals_R13,vals_R13_w100,errs_R13,errs_R13_w100)[0], \
+      "with error", calc_percent_change(vals_R13,vals_R13_w100,errs_R13,errs_R13_w100)[1])
+
+    print("average percent change of SV reso from R1.3 to w30:", \
+      calc_percent_change(vals_R13,vals_R13_w30,errs_R13,errs_R13_w30)[0], \
+      "with error", calc_percent_change(vals_R13,vals_R13_w30,errs_R13,errs_R13_w30)[1])
+
+    print("average percent change of SV reso from R1.3 to w30_DSK:", \
+      calc_percent_change(vals_R13,vals_R13_w30_DSK,errs_R13,errs_R13_w30_DSK)[0], \
+      "with error", calc_percent_change(vals_R13,vals_R13_w30_DSK,errs_R13,errs_R13_w30_DSK)[1])
+
+    print("average percent change of SV reso from w100 to w30:", \
+      calc_percent_change(vals_R13_w100,vals_R13_w30,errs_R13_w100,errs_R13_w30)[0], \
+      "with error", calc_percent_change(vals_R13_w100,vals_R13_w30,errs_R13_w100,errs_R13_w30)[1])
+
+    print("average percent change of SV reso from w30 to w30_DSK:", \
+      calc_percent_change(vals_R13_w30,vals_R13_w30_DSK,errs_R13_w30,errs_R13_w30_DSK)[0], \
+      "with error", calc_percent_change(vals_R13_w30,vals_R13_w30_DSK,errs_R13_w30,errs_R13_w30)[1])
+
+
+    print("------------------------")
+    b=slice(0,5)
+    print("percent change of SV reso in bin", b)
+    print("STD,R13", calc_percent_change(vals_std[b],vals_R13[b],errs_std[b],errs_R13[b])[0],
+       "with error", calc_percent_change(vals_std[b],vals_R13[b],errs_std[b],errs_R13[b])[1])
+    print("R13,L1_w30", calc_percent_change(vals_R13[b],vals_R13_L1_w30[b],errs_R13[b],errs_R13_L1_w30[b])[0],
+       "with error", calc_percent_change(vals_R13[b],vals_R13_L1_w30[b],errs_R13[b],errs_R13_L1_w30[b])[1])
+    print("R13,w100", calc_percent_change(vals_R13[b],vals_R13_w100[b],errs_R13[b],errs_R13_w100[b])[0],
+       "with error", calc_percent_change(vals_R13[b],vals_R13_w100[b],errs_R13[b],errs_R13_w100[b])[1])
+    print("R13,w30", calc_percent_change(vals_R13[b],vals_R13_w30[b],errs_R13[b],errs_R13_w30[b])[0],
+       "with error", calc_percent_change(vals_R13[b],vals_R13_w30[b],errs_R13[b],errs_R13_w30[b])[1])
+    print("R13,w30_DSK", calc_percent_change(vals_R13[b],vals_R13_w30_DSK[b],errs_R13[b],errs_R13_w30_DSK[b])[0],
+       "with error", calc_percent_change(vals_R13[b],vals_R13_w30_DSK[b],errs_R13[b],errs_R13_w30_DSK[b])[1])
+
+
+    print("------------------------")
+    b2=slice(5,10)
+    print("percent change of SV reso in bin", b2)
+    print("STD,R13", calc_percent_change(vals_std[b2],vals_R13[b2],errs_std[b2],errs_R13[b2])[0],
+       "with error", calc_percent_change(vals_std[b2],vals_R13[b2],errs_std[b2],errs_R13[b2])[1])
+    print("R13,L1_w30", calc_percent_change(vals_R13[b2],vals_R13_L1_w30[b2],errs_R13[b2],errs_R13_L1_w30[b2])[0],
+       "with error", calc_percent_change(vals_R13[b2],vals_R13_L1_w30[b2],errs_R13[b2],errs_R13_L1_w30[b2])[1])
+    print("R13,w100", calc_percent_change(vals_R13[b2],vals_R13_w100[b2],errs_R13[b2],errs_R13_w100[b2])[0],
+       "with error", calc_percent_change(vals_R13[b2],vals_R13_w100[b2],errs_R13[b2],errs_R13_w100[b2])[1])
+    print("R13,w30", calc_percent_change(vals_R13[b2],vals_R13_w30[b2],errs_R13[b2],errs_R13_w30[b2])[0],
+       "with error", calc_percent_change(vals_R13[b2],vals_R13_w30[b2],errs_R13[b2],errs_R13_w30[b2])[1])
+    print("R13,w30_DSK", calc_percent_change(vals_R13[b2],vals_R13_w30_DSK[b2],errs_R13[b2],errs_R13_w30_DSK[b2])[0],
+       "with error", calc_percent_change(vals_R13[b2],vals_R13_w30_DSK[b2],errs_R13[b2],errs_R13_w30_DSK[b2])[1])
+
+
+
     c2_2 = TCanvas("c2_2","c2_2")
-    stack.SetMaximum(50)
+    stack.SetMaximum(40)
     stack.SetMinimum(0)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
@@ -392,7 +517,7 @@ def plot_stuff(outDir,input_files,process_name):
     gStyle.SetLegendTextSize(0.035)
     gStyle.SetLegendBorderSize(0)
     #gStyle.SetLegendFillColor()
-    gPad.BuildLegend(0.16,0.65,0.4,0.88,"")
+    gPad.BuildLegend(0.16,0.60,0.4,0.88,"")
 
     tt=TLatex()
     tt.SetTextSize(0.04)
@@ -413,7 +538,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # Comparing Standard IDEA (w/ Drift chamber) to Full Silicon SV resol
 
-    stack = THStack("hs",";cos(#theta);  Secondary vertex (B_{S}^{0}) resolution [\mum]")
+    stack = THStack("hs",";|cos(#theta)|;  Secondary vertex (B_{S}^{0}) resolution [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -470,7 +595,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # Comparing Standard IDEA (w/ Drift chamber) to Full Silicon FD Reso
 
-    stack = THStack("hs",";cos(#theta); Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -551,7 +676,7 @@ def plot_stuff(outDir,input_files,process_name):
     # FD resol (with no fit) dR
 
 
-    stack = THStack("hs",";cos(#theta); Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Flight distance resolution (|R_{reco}-R_{MC}|) [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -578,7 +703,7 @@ def plot_stuff(outDir,input_files,process_name):
             i+=1
 
     c2 = TCanvas("c2","c2")
-    stack.SetMaximum(70)
+    stack.SetMaximum(60)
     stack.SetMinimum(0)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
@@ -609,7 +734,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # SV resol (no fit) with just d
 
-    stack = THStack("hs",";cos(#theta); Secondary vertex (B_{S}^{0}) resolution [\mum]")
+    stack = THStack("hs",";|cos(#theta)|; Secondary vertex (B_{S}^{0}) resolution [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -668,7 +793,7 @@ def plot_stuff(outDir,input_files,process_name):
 
     # momentum of Bs? h_slices_mom
     
-    stack = THStack("hs",";cos(#theta); MC Bs Energy [GeV]")
+    stack = THStack("hs",";|cos(#theta)|; MC Bs Energy [GeV]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
