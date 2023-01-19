@@ -58,10 +58,12 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
                 x.append(g.GetPointX(0))
                 y.append(g.GetPointY(0))
                 ey.append(g.GetErrorY(0))
+#                ey.append(2)
                 #print(g.GetErrorY(0))
                 ex.append(0)
-                if angle == 5:
+                if angle == 80:
                     print(g.GetPointX(0), g.GetPointY(0))
+                    print(g.GetErrorY(0))
             g_temp = TGraphErrors(n,x,y,ex,ey)
             print(x)
             if len(geometries)==1:
@@ -79,20 +81,26 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
                 g_temp.SetMarkerColor(colors[i])
                 g_temp.SetMarkerSize(0.9)
             mg.Add(g_temp)
-            i+=1
 
-
+            print(mom,geometry)
             #want to fit each g_temp with a fit function to extract params a and b
-            f1 = TF1("f1","[0]+[1]/([2]*pow(sin(x*pi/180),3/2))",9,90)
+#            f1 = TF1("f1","[0]+[1]/([2]*pow(sin(x*pi/180),3/2))",9,90)
+            f1 = TF1("f1","TMath::Sqrt(pow([0],2)+pow([1],2)/(pow([2],2)*pow(sin(x*pi/180),3)))",8,90)
+ 
             #set inital parameters
-            f1.SetParameter(0,3) #param a should be around 3
-            f1.SetParLimits(0,0,10)
+            f1.SetParameter(0,2) #param a should be around 3
+            f1.SetParLimits(0,1,25) #1,25
             f1.SetParameter(1,15) #param b should be around 15
-            #f1.SetParLimits(1,0,40)
+            f1.SetParLimits(1,7,40)
             f1.SetParameter(2,mom) #setting the momentum parameter to the momentum
             f1.SetParLimits(2,mom,mom) #fixing the momentum parameter
-            g_temp.Fit("f1")                       
- 
+
+            f1.SetLineColor(colors[i])
+            f1.SetLineWidth(1)
+            f1.SetLineStyle(2)
+
+            g_temp.Fit("f1")
+            i+=1
 
     gStyle.SetPadTickY(1)
     #gStyle.SetPadTickX(1)
@@ -100,7 +108,7 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
     
     f1.Draw()
 
-    mg.SetMaximum(1000.0)
+    mg.SetMaximum(3000.0)
     mg.SetMinimum(1.)
     mg.Draw("AP")
     #mg.Draw("AP,nostack,e1pl")
@@ -122,7 +130,17 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
     if nameToSave == "all_mom":
         num_legends=7
         x_left=.25
-    gPad.BuildLegend(x_left,0.75-(num_legends-3)*0.05-y_move_down,x_left+0.12,0.88-y_move_down,"")
+    gPad.BuildLegend(x_left+0.02,0.75-(num_legends-3)*0.05-y_move_down,x_left+0.14,0.88-y_move_down,"")
+
+
+    #manually adding fit fkt to the legend
+#    leg = TLegend(x_left+0.02,0.75-(num_legends-3)*0.05-y_move_down-0.06,x_left+0.12,0.88-y_move_down-0.27)
+    leg = TLegend(x_left+0.03,0.75-(num_legends-3)*0.05-y_move_down,x_left+0.3,0.88-y_move_down-0.37)
+    f1.SetLineColor(1)
+    leg.AddEntry(f1,"fit function = a #oplus b/(p sin^{3/2}(#theta))", "L")
+
+    leg.Draw("same")
+    leg.SetFillStyle(0)
 
     tt=TLatex()
     tt.SetTextSize(0.035)
@@ -131,6 +149,8 @@ def plot_impact_parameter(outDir, geometries,momenta,nameToSave,colors,markers):
     if len(geometries) == 1:
         if geometries[0] == "standard":
             tt.DrawLatexNDC(x_left,0.85,"#bf{Standard IDEA: R(Layer_{1}) = 1.7 cm, w(VTX layers) = 280 \mum}")
+
+
     gPad.Modified()
     gPad.Update()
 
@@ -306,7 +326,7 @@ if __name__ == "__main__":
     
 
     if args.analysis=="impact_parameter": 
-#        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w30"],[1,10,100],"all_mom",[1,1,1,2,2,2,4,4,4],[20,21,26,20,21,26,20,21,26])
+        plot_impact_parameter(outDir,["standard","R1.3","R1.3_w30"],[1,10,100],"all_mom",[1,1,1,2,2,2,4,4,4],[20,21,26,20,21,26,20,21,26])
 
 #        plot_impact_parameter(outDir,["R1.3_w100","R1.3_w100_DSK"],[1,10,100],"DSK_vs_noDSK",[1,1,2,2,4,4],[20,4,21,25,22,26])
 #        plot_impact_parameter(outDir,["R1.3_w30","R1.3_w30_DSK"],[1,10,100],"DSK_vs_noDSK_30",[1,1,2,2,4,4],[20,4,21,25,22,26])

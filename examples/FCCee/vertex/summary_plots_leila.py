@@ -33,6 +33,9 @@ def plot_impact_parameter(outDir,input_files,process_name):
     TH1.AddDirectory(False)
     gStyle.SetErrorX(0)
 
+    colors_L=[1,2,6,8,4,4]
+    markers_L=[20,21,24,47,22,26]
+
     gStyle.SetTitleSize(size=0.05, axis="X") #actually works, just for the plot after it. (axis title sizes)
     gStyle.SetTitleSize(size=0.05, axis="Y")
     gStyle.SetTitleOffset(offset=0.83, axis="Y")
@@ -41,7 +44,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
     # mom transverse
 
-    stack = THStack("hs",";cos(#theta); MC Transverse Momentum [GeV]")
+    stack = THStack("hs",";|cos(#theta)|; MC Transverse Momentum [GeV]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -96,7 +99,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
     # mom
 
-    stack = THStack("hs",";cos(#theta); MC Momentum [GeV]")
+    stack = THStack("hs",";|cos(#theta)|; MC Momentum [GeV]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -153,7 +156,10 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0
-    stack = THStack("hs",";cos(#theta); \sigma_{D0} [\mum]")
+    stack = THStack("hs",";#theta [degrees]; \sigma_{D_{0}} [\mum]")
+#    stack = THStack("hs",";cos(#theta); \sigma_{D_{0}} [\mum]")
+#    stack = THStack("hs",";|cos(#theta)|; \sigma_{D_{0}} [\mum]")
+
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -176,24 +182,60 @@ def plot_impact_parameter(outDir,input_files,process_name):
             hist.SetLineWidth(0)
             hist.SetMarkerSize(0.7)
             hists.append(hist)
+
+            print(name)
+
+            #want to fit each TProfile with a fit function to extract params a and b
+#            f1 = TF1("f1","[0]+[1]/([2]*pow(sin(x*pi/180),3/2))",8,90)
+#            f1 = TF1("f1","pow(pow([0],2)+pow([1],2)/(pow([2],2)*pow(sin(x*pi/180),3)),1/2)",8,90)
+            f1 = TF1("f1","TMath::Sqrt(pow([0],2)+pow([1],2)/(pow([2],2)*pow(sin(x*pi/180),3)))",8,90)
+
+            #set inital parameters
+            f1.SetParameter(0,3) #param a should be around 3
+            f1.SetParLimits(0,0.5,10) #0.5, 10
+            f1.SetParameter(1,20) #param b should be around 15
+            f1.SetParLimits(1,10,50) #10,50
+            f1.SetParameter(2,44.44) #setting the momentum parameter to the momentum
+            f1.SetParLimits(2,44.44-4.209,44.44+4.209) #fixing the momentum parameter
+
+            f1.SetLineColor(colors_1[i])
+            f1.SetLineWidth(1)
+            f1.SetLineStyle(2)
+            hist.Fit("f1")
+
+            #print(f1.Eval(20))
+
             stack.Add(hist)
             i+=1
 
     c1 = TCanvas("c1","c1")
-    stack.SetMaximum(4.0) #last point is out of range
-    stack.SetMinimum(1.5)
+
+    f1.Draw()
+
+    stack.SetMaximum(7.0) #last point is out of range
+    stack.SetMinimum(1.0)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
     stack.GetYaxis().SetLabelSize(0.04) 
-    gStyle.SetLegendTextSize(0.04)
+    gStyle.SetLegendTextSize(0.037)
     gStyle.SetLegendBorderSize(0)
     #gStyle.SetLegendFillColor()
-    gPad.BuildLegend(0.12,0.61,0.36,0.88,"")
+
+    gPad.BuildLegend(0.21,0.61,0.4,0.88,"")
+
+    leg = TLegend(0.23,0.55,0.4,0.61)
+    f1.SetLineColor(1)
+#    leg.AddEntry(f1,"fit function = (a^{2} + b^{2}/(p^{2} sin^{3}(#theta)))^{1/2}", "L")
+    leg.AddEntry(f1,"fit function = a #oplus b/(p sin^{3/2}(#theta))", "L")
+ 
+    leg.Draw("same")
+    leg.SetFillStyle(0)
 
     tt=TLatex()
     tt.SetTextSize(0.04)
     tt.DrawLatexNDC(0.58,0.915,"#it{IDEA Delphes simulation}")
     tt.DrawLatexNDC(0.14,0.915,"#bf{Z #rightarrow \mu^{+}\mu^{-}}")
+
     gPad.Modified()
     gPad.Update()
 
@@ -208,7 +250,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0 comparison without disks
-    stack_nodisks = THStack("hs_nodisks",";cos(#theta); \sigma_{D0} [\mum]")
+    stack_nodisks = THStack("hs_nodisks",";#theta [degrees]; \sigma_{D_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,2,8,40,4]
@@ -256,7 +298,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0 comparison WITH disks
-    stack_disks = THStack("hs_disks",";cos(#theta); \sigma_{D0} [\mum]")
+    stack_disks = THStack("hs_disks",";#theta [degrees]; \sigma_{D_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,1,2,2,4,4]
@@ -278,18 +320,56 @@ def plot_impact_parameter(outDir,input_files,process_name):
             hist.SetLineStyle(linestyles[i])
             hist.SetLineWidth(0)
             hist.SetMarkerSize(0.6)
+            #hist.SetMinimum(1.5) #have to set individ hist minimum to >0 for log scale to work
             hists.append(hist)
+
+       	    print(name)
+
+            #want to fit each TProfile with a fit function to extract params a and b
+            f1 = TF1("f1","TMath::Sqrt(pow([0],2)+pow([1],2)/(pow([2],2)*pow(sin(x*pi/180),3)))",8,90)
+
+            #set inital parameters
+            f1.SetParameter(0,3) #param a should be around 3
+            f1.SetParLimits(0,0.5,10) #0.5, 10
+            f1.SetParameter(1,20) #param b should be around 15
+            f1.SetParLimits(1,10,50) #10,50
+            f1.SetParameter(2,44.44) #setting the momentum parameter to the momentum
+            f1.SetParLimits(2,44.44-4.209,44.44+4.209) #fixing the momentum parameter
+
+            f1.SetLineColor(colors_2[i])
+            f1.SetLineWidth(1)
+            f1.SetLineStyle(2)
+            hist.Fit("f1")
+
+            #print(f1.Eval(20))
+
             stack_disks.Add(hist)
             i+=1
 
     c1 = TCanvas("c1","c1")
-    stack_disks.SetMaximum(3.2)
-    stack_disks.SetMinimum(1.8)
+
+    #gStyle.SetPadTickY(1)
+    #gPad.SetLogy(1)
+    #gPad.Update()
+    
+    f1.Draw()
+
+    stack_disks.SetMaximum(5.5)
+    stack_disks.SetMinimum(1.5)
     stack_disks.Draw("nostack,e1pl")
     stack_disks.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
     stack_disks.GetYaxis().SetLabelSize(0.04)
+    
+    #stack_disks.GetXaxis().SetMoreLogLabels() #didnt do anything
+
     gPad.BuildLegend(0.30,0.6,0.45,0.88,"") #x1 y1 x2 y2 coordinates of legend
 
+    leg = TLegend(0.3+0.02,0.6-0.06,0.45,0.88-0.27)
+    f1.SetLineColor(1)
+    leg.AddEntry(f1,"fit function = a #oplus b/(p sin^{3/2}(#theta))", "L")
+
+    leg.Draw("same")
+    leg.SetFillStyle(0)
 
     tt=TLatex()
     tt.SetTextSize(0.04)
@@ -340,7 +420,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # Z0
-    stack = THStack("hs",";cos(#theta); \sigma_{Z0} [\mum]")
+    stack = THStack("hs",";#theta [degrees]; \sigma_{Z_{0}} [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -363,19 +443,46 @@ def plot_impact_parameter(outDir,input_files,process_name):
             hist.SetLineWidth(0)
             hist.SetMarkerSize(0.7)
             hists.append(hist)
+
+            #want to fit each TProfile with a fit function to extract params a and b
+#            f1 = TF1("f1","[0]+[1]/([2]*pow(sin(x*pi/180),3/2))",9,90)
+#            f1 = TF1("f1","TMath::Sqrt(pow([0],2)+pow([1],2)/(pow([2],2)*pow(sin(x*pi/180),3)))",8,90)
+#            #set inital parameters
+#            f1.SetParameter(0,2) #param a should be around 3
+#            f1.SetParLimits(0,0.5,10)
+#            f1.SetParameter(1,30) #param b should be around 15
+#            f1.SetParLimits(1,15,50)
+#            f1.SetParameter(2,45) #setting the momentum parameter to the momentum
+#            f1.SetParLimits(2,45,45) #fixing the momentum parameter
+
+#            f1.SetLineColor(colors_1[i])
+#            f1.SetLineWidth(1)
+#            f1.SetLineStyle(2)
+#            hist.Fit("f1")
+
             stack.Add(hist)
             i+=1
 
     c2 = TCanvas("c2","c2")
-    stack.SetMaximum(7.0)
-    stack.SetMinimum(1.5)
+
+#    f1.Draw()
+
+    stack.SetMaximum(30)
+    stack.SetMinimum(1)
     stack.Draw("nostack,e1pl")
     stack.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
     stack.GetYaxis().SetLabelSize(0.04)
     gStyle.SetLegendTextSize(0.035)
     #gStyle.SetLegendBorderSize(0)
     #gStyle.SetLegendFillColor()
-    gPad.BuildLegend(0.25,0.65,0.4,0.88,"")
+    gPad.BuildLegend(0.26,0.65,0.4,0.88,"")
+
+#    leg = TLegend(0.28,0.60,0.4,0.65)
+#    f1.SetLineColor(1)
+#    leg.AddEntry(f1,"fit function = a + b/(p sin^{3/2}(#theta))", "L")
+#    leg.AddEntry(f1,"fit function = (a^{2} + b^{2}/(p^{2} sin^{3}(#theta)))^{1/2}", "L")
+#    leg.Draw("same")
+#    leg.SetFillStyle(0)
 
     tt=TLatex()
     tt.SetTextSize(0.04)
@@ -394,7 +501,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # Z0 comparison without disks
-    stack2_nodisks = THStack("hs2_nodisks",";cos(#theta); \sigma_{Z0} [\mum]")
+    stack2_nodisks = THStack("hs2_nodisks",";#theta [degrees]; \sigma_{Z_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,2,8,40,4]
@@ -438,7 +545,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # Z0 comparison WITH disks
-    stack_disks = THStack("hs_disks",";cos(#theta); \sigma_{Z0} [\mum]")
+    stack_disks = THStack("hs_disks",";#theta [degrees]; \sigma_{Z_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,1,2,2,4,4]
@@ -465,7 +572,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
             i+=1
 
     c2 = TCanvas("c2","c2")
-    stack_disks.SetMaximum(7)
+    stack_disks.SetMaximum(25)
     stack_disks.SetMinimum(1.5)
     stack_disks.Draw("nostack,e1pl")
     stack_disks.GetXaxis().SetLabelSize(0.04) #changes the size of the x axis values
