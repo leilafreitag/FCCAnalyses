@@ -156,7 +156,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0
-    stack = THStack("hs",";#theta [degrees]; \sigma_{D_{0}} [\mum]")
+    stack = THStack("hs",";#theta [degrees]; \sigma_{d_{0}} [\mum]")
 #    stack = THStack("hs",";cos(#theta); \sigma_{D_{0}} [\mum]")
 #    stack = THStack("hs",";|cos(#theta)|; \sigma_{D_{0}} [\mum]")
 
@@ -250,7 +250,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0 comparison without disks
-    stack_nodisks = THStack("hs_nodisks",";#theta [degrees]; \sigma_{D_{0}} [\mum]")
+    stack_nodisks = THStack("hs_nodisks",";#theta [degrees]; \sigma_{d_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,2,8,40,4]
@@ -298,7 +298,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # D0 comparison WITH disks
-    stack_disks = THStack("hs_disks",";#theta [degrees]; \sigma_{D_{0}} [\mum]")
+    stack_disks = THStack("hs_disks",";#theta [degrees]; \sigma_{d_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,1,2,2,4,4]
@@ -420,7 +420,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # Z0
-    stack = THStack("hs",";#theta [degrees]; \sigma_{Z_{0}} [\mum]")
+    stack = THStack("hs",";#theta [degrees]; \sigma_{z_{0}} [\mum]")
     hists = list()
 
     colors_all=[1,2,3,3,4,4,6,6]
@@ -501,7 +501,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # Z0 comparison without disks
-    stack2_nodisks = THStack("hs2_nodisks",";#theta [degrees]; \sigma_{Z_{0}} [\mum]")
+    stack2_nodisks = THStack("hs2_nodisks",";#theta [degrees]; \sigma_{z_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,2,8,40,4]
@@ -545,7 +545,7 @@ def plot_impact_parameter(outDir,input_files,process_name):
 
 
     # Z0 comparison WITH disks
-    stack_disks = THStack("hs_disks",";#theta [degrees]; \sigma_{Z_{0}} [\mum]")
+    stack_disks = THStack("hs_disks",";#theta [degrees]; \sigma_{z_{0}} [\mum]")
     hists = list()
 
     colors_2 = [1,1,2,2,4,4]

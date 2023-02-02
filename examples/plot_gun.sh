@@ -9,11 +9,18 @@
 #echo $input_files
 
 
-#python FCCee/vertex/plotting_armin.py -i Zmumu_ecm91*.root
-#python FCCee/vertex/summary_plots.py --analysis impact_parameter -i FCCee/vertex/Zmumu_ecm91*/plots.root
 
 #THE ONES I USE:
-#python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_standard_10GeV_20degrees.root
-#python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_*_1*GeV_*.root
+#python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_*10GeV*.root
+#python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_*1GeV*.root
+#python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_*100GeV*.root
+
+#python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_*_0.5GeV_*.root
 #python FCCee/vertex/plotting_leila_gun.py -i ParticleGun_Mu_*.root
-python FCCee/vertex/summary_plots_particle_gun.py --analysis impact_parameter 
+
+#python FCCee/vertex/summary_plots_particle_gun.py --analysis impact_parameter 
+
+python FCCee/vertex/summary_plots_particle_gun_fits.py --analysis impact_parameter #for fitting
+
+#python FCCee/vertex/summary_plots_particle_gun_extra.py --analysis impact_parameter #for 0.5 GeV
+
